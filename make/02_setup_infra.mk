@@ -8,6 +8,12 @@ create-environment-yaml: ### Create environment.yaml using pyproject.toml as bas
 	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://${SPARK_STAGING_BUCKET_NAME}
 	gsutil cp environment.yaml gs://${SPARK_STAGING_BUCKET_NAME}/environment.yaml
 
+.PHONY: create-gcs-buckets
+create-gcs-buckets: ### Create Google Cloud Storage Buckets
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://unsplash-topics-dev
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://unsplash-topics-test
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://unsplash-topics-prod
+
 .PHONY: create-spark-cluster 
 create-spark-cluster: ## Create GCP Dataproc (Spark) Cluster
 	gcloud dataproc clusters create ${SPARK_CLUSTER_NAME} \
