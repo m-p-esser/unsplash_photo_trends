@@ -14,7 +14,7 @@
 
 ```
 .
-└── .github        --> Github actions (e.g. CI)
+└── .github          --> Github actions (e.g. CI)
 ├── data             --> Data in different stages (raw, staged, final)
 │   ├── 00_raw       --> Immutable, raw data
 │   ├── 01_staged    --> Processed data
@@ -28,6 +28,7 @@
 ├── output           --> Deliverables in form of reports or models
 │   ├── models
 │   └── reports
+├── references       --> Data dictionaries, manuals, and all other explanatory materials
 ├── src              --> Source code (Python, JS)
 │   ├── commoncrawl
 │   └── prefect
