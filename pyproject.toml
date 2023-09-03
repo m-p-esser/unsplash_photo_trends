@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "unsplash-photo-trends"
+version = "0.1.0"
+description = ""
+authors = ["Marc-Philipp Esser <m-esser@mail.de>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+prefect-gcp = {extras = ["cloud-storage"], version = "^0.4.5"}
+ipykernel = "^6.25.1"
+aiohttp = "^3.8.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pre-commit = "^3.3.3"
+pytest = "^7.4.0"
+isort = "^5.12.0"
+interrogate = "^1.5.0"
+autoflake = "^2.2.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
