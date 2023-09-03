@@ -67,10 +67,10 @@ bind-iam-policies-to-deployment-service-account: ## Bind IAM Policies to Service
 .PHONY: setup-gcp
 setup-gcp: ## Setup GCP Project so it can be used for development, CI or production
 	@echo "Setting up GCP Project"
-# "$(MAKE)" create-gcp-project
+	"$(MAKE)" create-gcp-project
 	"$(MAKE)" set-default-gcp-project
-# "$(MAKE)" link-project-to-billing-account
-#	"$(MAKE)" create-deployment-service-account
+	"$(MAKE)" link-project-to-billing-account
+	"$(MAKE)" create-deployment-service-account
 	"$(MAKE)" create-deployment-service-account-key-file
 	"$(MAKE)" enable-gcp-services
 	"$(MAKE)" bind-iam-policies-to-deployment-service-account
