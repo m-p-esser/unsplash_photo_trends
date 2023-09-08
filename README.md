@@ -22,7 +22,7 @@
 ├── deployments      --> Prefect deployment .yaml files
 ├── docs
 │   └── images
-├── images           --> Docker Images
+├── images           --> Docker Images (which are used across flows)
 ├── make             --> Makefiles for setting up ressources and environment
 │   └── prefect
 ├── notebooks        --> Jupyter or Observeable (JS) Notebooks
