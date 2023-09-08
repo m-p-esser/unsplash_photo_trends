@@ -29,10 +29,10 @@
 │   ├── models
 │   └── reports
 ├── references       --> Data dictionaries, manuals, and all other explanatory materials
-├── src              --> Source code (Python, JS)
+├── src              --> Source code (Python)
 │   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
 │   └── prefect      --> Prefect Flows
-│   └── prefect      --> Python utility scripts
+│   └── scripts      --> Python utility scripts
 ├── tests            --> Unit tests
 ```
 
