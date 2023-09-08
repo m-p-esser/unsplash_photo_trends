@@ -10,7 +10,7 @@ from google.cloud import storage
 from prefect import flow, get_run_logger, task
 from prefect.blocks.system import Secret
 from src.etl.load import upload_blob_from_file
-from utils import load_env_variables, timer
+from src.utils import load_env_variables, timer
 
 
 @task
