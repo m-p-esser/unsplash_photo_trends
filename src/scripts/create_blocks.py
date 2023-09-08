@@ -68,7 +68,7 @@ def create_google_cloud_run_block():
     cloud_run_job_block = CloudRunJob(
         credentials=gcp_credentials,
         project_id=project_id,
-        image=f"{registry_adress}/prefect-runner:{env_vars['PREFECT_VERSION']}-python{env_vars['PYTHON_VERSION']}",
+        image=f"{registry_adress}/prefect:{env_vars['PREFECT_VERSION']}-python{env_vars['PYTHON_VERSION']}",
         region=env_vars["GCP_DEFAULT_REGION"],
     ).save(name=GOOGLE_CLOUD_RUN_BLOCK_NAME, overwrite=True)
 
