@@ -13,7 +13,7 @@ from src.etl.load import upload_blob_from_file
 from src.utils import load_env_variables, timer
 
 
-@task
+@task(retries=3, retry_delay_seconds=10)
 @timer
 def request_topics() -> list[dict]:
     """Request topics (= photography genres which have a seperate content site on unsplash) from Unsplash API"""
@@ -50,7 +50,7 @@ def request_topics() -> list[dict]:
     return response_json
 
 
-@task
+@task(retries=3, retry_delay_seconds=10)
 @timer
 def load_topics_as_jsonl_to_gcs_bucket(
     response_json: dict, env: str = "DEV"
