@@ -17,6 +17,8 @@ ipykernel = "^6.25.1"
 aiohttp = "^3.8.5"
 pandas = "^2.1.0"
 prefect = "^2.12.1"
+prefect-github = "^0.1.5"
+google-cloud = "^0.34.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
