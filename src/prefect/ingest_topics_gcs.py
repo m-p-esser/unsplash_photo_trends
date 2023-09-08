@@ -1,12 +1,13 @@
 """ Flow to request https://api.unsplash.com/topics/ Endpoint """
 
 
+import os
+
 # from etl.load import upload_blob_from_file
-# from prefect import flow, get_run_logger, task
+from prefect import flow
+
 # from prefect.blocks.system import Secret
 # from utils import load_env_variables, timer
-
-import os
 
 
 def list_files(startpath):
@@ -19,9 +20,6 @@ def list_files(startpath):
         for f in files:
             print(f"{subindent}{f}")
 
-
-# Call the function with the directory you want to start from
-list_files(".")
 
 # @task
 # @timer
@@ -88,15 +86,17 @@ list_files(".")
 #         return blob
 
 
-# @flow
+@flow
 # @timer
-# def ingest_topics_gcs():
-#     """Flow to load topics from Unsplash and store them in a Google Cloud Storage Bucket"""
-#     response_json = request_topics()
-#     env_variables = load_env_variables()
-#     env = env_variables["ENV"]  # dev, test or prod
-#     load_topics_as_jsonl_to_gcs_bucket(response_json, env)
+def ingest_topics_gcs():
+    """Flow to load topics from Unsplash and store them in a Google Cloud Storage Bucket"""
+    # Call the function with the directory you want to start from
+    list_files(".")
+    # response_json = request_topics()
+    # env_variables = load_env_variables()
+    # env = env_variables["ENV"]  # dev, test or prod
+    # load_topics_as_jsonl_to_gcs_bucket(response_json, env)
 
 
-# if __name__ == "__main__":
-#     ingest_topics_gcs()
+if __name__ == "__main__":
+    ingest_topics_gcs()
