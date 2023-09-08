@@ -5,6 +5,7 @@ import json
 from tempfile import NamedTemporaryFile
 
 import requests
+from google.cloud import storage
 
 from etl.load import upload_blob_from_file
 from prefect import flow, get_run_logger, task
@@ -51,7 +52,9 @@ def request_topics() -> list[dict]:
 
 @task
 @timer
-def load_topics_as_jsonl_to_gcs_bucket(response_json: dict, env: str = "DEV"):
+def load_topics_as_jsonl_to_gcs_bucket(
+    response_json: dict, env: str = "DEV"
+) -> storage.bucket.Bucket.blob:
     """Store topics (= photography genres which have a seperate content site on unsplash) as Blob in Google Cloud Storage Bucket"""
     logger = get_run_logger()
 
