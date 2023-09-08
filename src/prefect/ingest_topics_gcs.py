@@ -3,7 +3,6 @@
 
 import os
 
-# from etl.load import upload_blob_from_file
 from prefect import flow, get_run_logger
 
 # from prefect.blocks.system import Secret
