@@ -24,15 +24,15 @@
 │   └── images
 ├── images           --> Docker Images (which are used across flows)
 ├── make             --> Makefiles for setting up ressources and environment
-│   └── prefect
 ├── notebooks        --> Jupyter or Observeable (JS) Notebooks
 ├── output           --> Deliverables in form of reports or models
 │   ├── models
 │   └── reports
 ├── references       --> Data dictionaries, manuals, and all other explanatory materials
 ├── src              --> Source code (Python, JS)
-│   ├── commoncrawl
-│   └── prefect
+│   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
+│   └── prefect      --> Prefect Flows
+│   └── prefect      --> Python utility scripts
 ├── tests            --> Unit tests
 ```
 
