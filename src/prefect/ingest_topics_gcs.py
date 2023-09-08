@@ -4,22 +4,10 @@
 import os
 
 # from etl.load import upload_blob_from_file
-from prefect import flow
+from prefect import flow, get_run_logger
 
 # from prefect.blocks.system import Secret
 # from utils import load_env_variables, timer
-
-
-def list_files(startpath):
-    """List File Structure"""
-    for root, dirs, files in os.walk(startpath):
-        level = root.replace(startpath, "").count(os.sep)
-        indent = " " * 4 * (level)
-        print(f"{indent}{os.path.basename(root)}/")
-        subindent = " " * 4 * (level + 1)
-        for f in files:
-            print(f"{subindent}{f}")
-
 
 # @task
 # @timer
@@ -91,7 +79,16 @@ def list_files(startpath):
 def ingest_topics_gcs():
     """Flow to load topics from Unsplash and store them in a Google Cloud Storage Bucket"""
     # Call the function with the directory you want to start from
-    list_files(".")
+
+    logger = get_run_logger()
+
+    for root, dirs, files in os.walk("."):
+        level = root.replace(".", "").count(os.sep)
+        indent = " " * 4 * (level)
+        logger.info(f"{indent}{os.path.basename(root)}/")
+        subindent = " " * 4 * (level + 1)
+        for f in files:
+            logger.info(f"{subindent}{f}")
     # response_json = request_topics()
     # env_variables = load_env_variables()
     # env = env_variables["ENV"]  # dev, test or prod
