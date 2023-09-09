@@ -12,13 +12,14 @@ on:
     branches:
       - develop
       - test
-  workflow_dispatch: # Allows for manual runs
+  # Allows for manual runs
+  workflow_dispatch: 
 
 permissions:
   contents: read
 
 jobs:
-  ci:
+  install-python:
     strategy:
       fail-fast: false
       matrix:
