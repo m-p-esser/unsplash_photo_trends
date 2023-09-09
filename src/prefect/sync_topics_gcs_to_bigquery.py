@@ -88,11 +88,13 @@ def sync_gcs_and_bigquery_table(
 @timer
 def sync_topics_gcs_to_bigquery(table_name: str, source_uri: str, file_format: str):
     """Sync Google Cloud Storage with Bigquery Table using Push pattern"""
-    bigquery_client = construct_bigquery_client()
 
+    logger = get_run_logger()
     env_variables = load_env_variables()
     env = env_variables["ENV"]  # dev, test or prod
+    logger.info(f"Environment:{env}")
 
+    bigquery_client = construct_bigquery_client()
     create_dataset(bigquery_client, env)
     sync_gcs_and_bigquery_table(
         bigquery_client,
