@@ -53,8 +53,8 @@ def request_topics() -> list[dict]:
 @task(retries=3, retry_delay_seconds=10)
 @timer
 def load_topics_as_jsonl_to_gcs_bucket(
-    response_json: dict, env: str = "DEV"
-) -> storage.bucket.Bucket.blob:
+    response_json: dict, env: str = "dev"
+) -> storage.blob.Blob:
     """Store topics (= photography genres which have a seperate content site on unsplash) as Blob in Google Cloud Storage Bucket"""
     logger = get_run_logger()
 
