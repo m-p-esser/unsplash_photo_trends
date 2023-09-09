@@ -26,7 +26,7 @@ repos:
     name: Sorting import statements
     args:
       [
-        -m=HANGING_INDENT_WITH_PARENTHESES # See https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+        "--profile=black"
       ]
 
 - repo: https://github.com/econchick/interrogate
