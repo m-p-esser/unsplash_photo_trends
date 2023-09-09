@@ -10,7 +10,7 @@ work_pool_name: dev-cloud-run-push-work-pool
 tags: []
 parameters: {}
 schedule: null
-is_schedule_active: null
+is_schedule_active: true
 infra_overrides: {}
 
 ###
@@ -91,5 +91,5 @@ parameter_openapi_schema:
   - source_uri
   - file_format
   definitions: null
-timestamp: '2023-09-09T16:52:10.687211+00:00'
+timestamp: '2023-09-09T16:54:10.529405+00:00'
 triggers: []
