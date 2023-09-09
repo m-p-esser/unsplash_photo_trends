@@ -14,6 +14,7 @@ push-prefect-runner-image: ## Deploy Prefect Runner Image (generic Prefect image
 .PHONY: deploy-ingest-topics-gcs
 deploy-ingest-topics-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 	make env-init
+	push-prefect-runner-image
 	prefect deployment build src/prefect/ingest_topics_gcs.py:ingest_topics_gcs \
 		--name ingest-topics-gcs-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
@@ -26,6 +27,7 @@ deploy-ingest-topics-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 .PHONY: deploy-healthcheck
 deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
 	make env-init
+	push-prefect-runner-image
 	prefect deployment build src/prefect/healthcheck.py:healthcheck \
 		--name healthcheck-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
@@ -38,6 +40,7 @@ deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
 .PHONY: deploy-sync-topics-gcs-to-bigquery
 deploy-sync-topics-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
 	make env-init
+	push-prefect-runner-image
 	prefect deployment build src/prefect/sync_topics_gcs_to_bigquery.py:sync_topics_gcs_to_bigquery \
 		--name sync-topics-gcs-to-bigquery-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
