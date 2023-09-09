@@ -14,7 +14,7 @@
 
 ```
 .
-└── .github        --> Github actions (e.g. CI)
+└── .github          --> Github actions (e.g. CI)
 ├── data             --> Data in different stages (raw, staged, final)
 │   ├── 00_raw       --> Immutable, raw data
 │   ├── 01_staged    --> Processed data
@@ -22,28 +22,37 @@
 ├── deployments      --> Prefect deployment .yaml files
 ├── docs
 │   └── images
+├── images           --> Docker Images (which are used across flows)
 ├── make             --> Makefiles for setting up ressources and environment
-│   └── prefect
 ├── notebooks        --> Jupyter or Observeable (JS) Notebooks
 ├── output           --> Deliverables in form of reports or models
 │   ├── models
 │   └── reports
-├── src              --> Source code (Python, JS)
-│   ├── commoncrawl
-│   └── prefect
+├── references       --> Data dictionaries, manuals, and all other explanatory materials
+├── src              --> Source code (Python)
+│   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
+│   └── prefect      --> Prefect Flows
+│   └── scripts      --> Python utility scripts
 ├── tests            --> Unit tests
 ```
 
 ## Setup
 
 ### Activate Pre-commit 
-pre-commit install
+Install Pre-commit hooks (for code formatting, import statement checks before committing)
+- `pre-commit install`
 
 ### Environment Variables
-1. Define values in base.env (not part of this repository)
+Define values in base.env (not part of this repository)
+
+### Github Action Secrets
+Add the following Secrets as Action secrets to your Github repository: 
+- PREFECT_API_KEY
+- PREFECT_API_URL
+See https://docs.prefect.io/latest/api-ref/rest-api/#finding-your-prefect-cloud-details
 
 ### GCP Setup
-1. Run `make setup-gcp` to setup up the Google Cloud Project
+Run `make setup-gcp` to setup up the Google Cloud Project
 
 If this doesn't work, run the commands from `00_00_setup_gcp.mk` command by command in the following order:
 - `make create-gcp-project`
@@ -57,18 +66,18 @@ If this doesn't work, run the commands from `00_00_setup_gcp.mk` command by comm
 
 ### Environment Setup
 *necessary everytime you start working on the project*
-1. `make dev-init` to setup development environment
+- `make dev-init` to setup development environment
 
 ### Prefect Setup
-As mentioned above, this project requires a Prefect account and access to the Prefect ckoud
-
-<!-- Create Repository in Google Artifact Registry where you can deploy Docker images
-1. `make create-blocks`
-2. `make create-prefect-artifact-repository` -->
+As mentioned above, this project requires a Prefect account and access to the Prefect Cloud
+- `make setup-prefect` 
 
 ### Setup Storage
-1. Setup the storage infrastructure by running
+Setup the storage infrastructure by running
+- `make create-gcs-buckets`
 
 ### Deploy 
-- Add description here
+If there are updates to the Prefect runner base image (Dockerfile under `images/prefect_runner/Dockerfile`) run the following command:
+- `make push-prefect-runner-image`
 
+Then run the deploy command for a specific flow, e.g. `make deploy-healthcheck`

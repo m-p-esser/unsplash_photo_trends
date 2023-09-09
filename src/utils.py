@@ -25,12 +25,10 @@ def timer(func):
 def load_env_variables() -> dict:
     """Load Environment variables into memory"""
     environment = dotenv_values("make/.env")
-    ENV = environment["ENV"]  # dev, test or prod
 
-    base_env_variables = dotenv_values(
+    env_variables = dotenv_values(
         f"make/base.env"
     )  # used across enviroments (dev, test, prod)
-    env_variables = dotenv_values(f"make/{ENV}.env")  # environment specific variables
-    env_variables.update(base_env_variables)  # Combine both
+    env_variables.update(environment)  # Combine both
 
     return env_variables

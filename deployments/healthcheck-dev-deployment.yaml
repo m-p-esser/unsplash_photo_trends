@@ -1,0 +1,83 @@
+###
+### A complete description of a Prefect Deployment for flow 'healthcheck'
+###
+name: healthcheck-dev
+description: Collect information about machine and if it is accessible
+version: a0206f26055b649eda838cd1b3634ba2
+# The work queue that will handle this deployment's runs
+work_queue_name: default
+work_pool_name: dev-cloud-run-push-work-pool
+tags: []
+parameters: {}
+schedule:
+  cron: 0 8 * * *
+  timezone: null
+  day_or: true
+is_schedule_active: true
+infra_overrides: {}
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: healthcheck
+manifest_path: null
+infrastructure:
+  type: cloud-run-job
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  image: europe-west3-docker.pkg.dev/unsplash-photo-trends/prefect-dev/prefect:2.13.0-python3.10
+  region: europe-west3
+  credentials:
+    service_account_file: null
+    service_account_info:
+      type: '**********'
+      auth_uri: '**********'
+      client_id: '**********'
+      token_uri: '**********'
+      project_id: '**********'
+      private_key: '**********'
+      client_email: '**********'
+      private_key_id: '**********'
+      universe_domain: '**********'
+      client_x509_cert_url: '**********'
+      auth_provider_x509_cert_url: '**********'
+    project: unsplash-photo-trends
+    _service_account_email: deployment-sa@unsplash-photo-trends.iam.gserviceaccount.com
+    _block_document_id: 136bddbf-b6de-4f26-94d7-f0656118bb85
+    _block_document_name: unsplash-photo-trends-deployment-sa
+    _is_anonymous: false
+    block_type_slug: gcp-credentials
+  cpu: null
+  memory: null
+  memory_unit: null
+  vpc_connector_name: null
+  args: null
+  keep_job: false
+  timeout: 600
+  _block_document_id: bf8acf5e-56a9-4aac-9146-e07d3d16d957
+  _block_document_name: unsplash-photo-trends-google-cloud-run-dev
+  _is_anonymous: false
+  block_type_slug: cloud-run-job
+  _block_type_slug: cloud-run-job
+storage:
+  repository: https://github.com/m-p-esser/unsplash_photo_trends.git
+  reference: develop
+  access_token: null
+  include_git_objects: true
+  _block_document_id: 6d99d82b-f9b7-41d2-8e5e-e074f9a43493
+  _block_document_name: unsplash-photo-trends-github-dev
+  _is_anonymous: false
+  block_type_slug: github
+  _block_type_slug: github
+path: ''
+entrypoint: src/prefect/healthcheck.py:healthcheck
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
+timestamp: '2023-09-08T23:27:44.449498+00:00'
+triggers: []

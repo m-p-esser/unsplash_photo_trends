@@ -91,3 +91,7 @@ common_crawl.egg-info
 
 # Experimental files to try new Python functionality
 src/experimental
+
+# requirements.txt and setup.py is only need when building a Docker image from a Dockerfile
+requirements.txt
+setup.py
