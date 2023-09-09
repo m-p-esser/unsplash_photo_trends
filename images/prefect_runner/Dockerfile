@@ -14,7 +14,6 @@ FROM debian:bookworm-slim
 FROM prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON_VERSION}
 
 COPY requirements.txt requirements.txt
-COPY setup.py setup.py
 COPY make/.env make/.env
 
 RUN pip install --no-cache-dir -r requirements.txt
