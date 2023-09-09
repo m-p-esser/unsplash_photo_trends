@@ -1,22 +1,5 @@
 ##@ [Flow: Deployment]
 
-.PHONY: create-prefect-blocks
-create-prefect-blocks: ### Create Prefect Blocks
-	python3 src/scripts/create_blocks.py
-
-.PHONY: create-prefect-artifact-repository
-create-prefect-artifact-repository: ## Create GCP Artificat Repository for Prefect Flows
-	gcloud artifacts repositories create prefect-$(ENV) --repository-format DOCKER --location $(GCP_DEFAULT_REGION)
-	gcloud auth configure-docker \
-		$(GCP_DEFAULT_REGION)-docker.pkg.dev
-
-# @see https://docs.prefect.io/latest/concepts/work-pools/
-.PHONY: create-google-cloud-run-push-work-pool
-create-google-cloud-run-push-work-pool: ## Create Google Cloud Run Workflow (for Agentless deployment)
-	prefect work-pool create dev-cloud-run-push-work-pool \
-		--type cloud-run:push
-# Need to manually add GCP Credentials under Work Pool Settings
-
 .PHONY: push-prefect-runner-image
 push-prefect-runner-image: ## Deploy Prefect Runner Image (generic Prefect image to run all flows)
 	poetry export -o requirements.txt --without-hashes --without-urls --without=dev,test
