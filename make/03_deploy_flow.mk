@@ -42,9 +42,10 @@ deploy-sync-topics-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
 	make env-init
 	make push-prefect-runner-image
 	prefect deployment build src/prefect/sync_topics_gcs_to_bigquery.py:sync_topics_gcs_to_bigquery \
-		--name sync-topics-gcs-to-bigquery-${ENV} \
+		--name sync-topics-gcs-to-bigquery \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
 		--output deployments/sync-topics-gcs-to-bigquery-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
+		--params='{"table_name": "topics", "source_uri": "gs://unsplash-topics-${ENV}/*.parquet", "file_format": "PARQUET"}' \
 		--apply
