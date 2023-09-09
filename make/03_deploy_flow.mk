@@ -34,3 +34,14 @@ deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--cron "0 8 * * *" \
 		--apply
+
+.PHONY: deploy-sync-topics-gcs-to-bigquery
+deploy-sync-topics-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
+	make env-init
+	prefect deployment build src/prefect/sync_topics_gcs_to_bigquery.py:sync_topics_gcs_to_bigquery \
+		--name sync-topics-gcs-to-bigquery-${ENV} \
+		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
+		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
+		--output deployments/sync-topics-gcs-to-bigquery-${ENV}-deployment.yaml \
+		--pool ${ENV}-cloud-run-push-work-pool \
+		--apply
