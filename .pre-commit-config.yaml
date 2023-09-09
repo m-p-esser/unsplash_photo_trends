@@ -31,7 +31,7 @@ repos:
     name: Sorting import statements
     args:
       [
-        --multi-line-output 5 # Hanging Grid Grouped, see https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+        -m=NOQA # See https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
       ]
 
 - repo: https://github.com/econchick/interrogate
