@@ -2,11 +2,6 @@
 # See https://betterprogramming.pub/build-a-pre-commit-workflow-to-check-and-fix-your-python-code-automatically-313deb5a5701
 
 repos:
-- repo: https://github.com/ambv/black
-  rev: 23.7.0
-  hooks:
-  - id: black
-    name: Black Python code formatting
 
 - repo: https://github.com/PyCQA/autoflake
   rev: v2.2.0
@@ -45,3 +40,9 @@ repos:
       )
     args: [-vv, -i, --fail-under=80]
     name: Check if functions/classes have docstrings
+
+- repo: https://github.com/ambv/black
+  rev: 23.7.0
+  hooks:
+  - id: black
+    name: Black Python code formatting
