@@ -54,4 +54,4 @@ jobs:
           poetry run prefect config set PREFECT_API_URL=${{ secrets.PREFECT_API_URL }}
         shell: bash
       - name: Run the unit tests
-        run: poetry run pytest -v
+        run: poetry run pytest -vvv
