@@ -1,10 +1,7 @@
 from google.cloud import storage
 
 from prefect.logging import disable_run_logger
-from src.prefect.ingest_topics_gcs import (
-    load_topics_as_jsonl_to_gcs_bucket,
-    request_topics,
-)
+from src.prefect.ingest_topics_gcs import load_topics_to_gcs_bucket, request_topics
 
 
 def test_request_topics_successful():
@@ -13,7 +10,7 @@ def test_request_topics_successful():
         assert len(response_json) > 0
 
 
-def test_load_topics_as_jsonl_to_gcs_bucket_successful():
+def load_topics_to_gcs_bucket_successful():
     with disable_run_logger():
         response_json = [
             {
@@ -221,5 +218,5 @@ def test_load_topics_as_jsonl_to_gcs_bucket_successful():
                 "visibility": "featured",
             }
         ]
-        blob = load_topics_as_jsonl_to_gcs_bucket.fn(response_json)
+        blob = load_topics_to_gcs_bucket.fn(response_json)
         assert isinstance(blob, storage.blob.Blob)
