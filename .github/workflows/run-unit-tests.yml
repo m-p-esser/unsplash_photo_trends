@@ -4,6 +4,8 @@
 name: Unit Test Prefect Flows
 
 on:
+  # Allows for manual runs
+  workflow_dispatch: 
   push:
     branches:
       - develop
@@ -12,8 +14,6 @@ on:
     branches:
       - develop
       - test
-  # Allows for manual runs
-  workflow_dispatch: 
 
 permissions:
   contents: read
