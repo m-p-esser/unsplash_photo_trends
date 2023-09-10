@@ -51,14 +51,14 @@ deploy-ingest-monthly-platform-stats-gcs: ## Deploy Ingest Topic GCS Flow as Goo
 		--apply
 
 .PHONY: deploy-sync-topics-gcs-to-bigquery
-deploy-sync-topics-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
+deploy-sync-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
 	make env-init
 	make push-prefect-runner-image
-	prefect deployment build src/prefect/sync_topics_gcs_to_bigquery.py:sync_topics_gcs_to_bigquery \
-		--name sync-topics-gcs-to-bigquery \
+	prefect deployment build src/prefect/sync_gcs_to_bigquery.py:sync_gcs_to_bigquery \
+		--name sync-gcs-to-bigquery \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/sync-topics-gcs-to-bigquery-${ENV}-deployment.yaml \
+		--output deployments/sync-gcs-to-bigquery-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"table_name": "topics", "source_uri": "gs://unsplash-topics-${ENV}/*.parquet", "file_format": "PARQUET"}' \
 		--apply
