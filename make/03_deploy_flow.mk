@@ -37,6 +37,19 @@ deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
 		--cron "0 8 * * *" \
 		--apply
 
+.PHONY: deploy-ingest-monthly-platform-stats-gcs
+deploy-ingest-monthly-platform-stats-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
+	make env-init
+	make push-prefect-runner-image
+	prefect deployment build src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs \
+		--name ingest-monthly-platform-stats-gcs-${ENV} \
+		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
+		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
+		--output deployments/ingest-topics-gcs-${ENV}-deployment.yaml \
+		--pool ${ENV}-cloud-run-push-work-pool \
+		--cron "0 9 * * *" \
+		--apply
+
 .PHONY: deploy-sync-topics-gcs-to-bigquery
 deploy-sync-topics-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
 	make env-init
