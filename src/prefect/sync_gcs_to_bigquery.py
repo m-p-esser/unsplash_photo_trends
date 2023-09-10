@@ -5,7 +5,7 @@ from google.cloud.exceptions import NotFound
 from prefect_gcp import GcpCredentials
 
 from prefect import flow, get_run_logger, task
-from src.utils import load_env_variables, timer
+from src.utils import timer
 
 
 @task
@@ -86,13 +86,10 @@ def sync_gcs_and_bigquery_table(
 
 @flow
 @timer
-def sync_gcs_to_bigquery(table_name: str, source_uri: str, file_format: str):
+def sync_gcs_to_bigquery(
+    table_name: str, source_uri: str, file_format: str, env: str = "dev"
+):
     """Sync Google Cloud Storage with Bigquery Table using Push pattern"""
-
-    logger = get_run_logger()
-    env_variables = load_env_variables()
-    env = env_variables["ENV"]  # dev, test or prod
-    logger.info(f"Environment:{env}")
 
     bigquery_client = construct_bigquery_client()
     create_dataset(bigquery_client, env)
