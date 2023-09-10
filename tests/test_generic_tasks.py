@@ -1,16 +1,21 @@
+import pandas as pd
 from google.cloud import storage
 
 from prefect.logging import disable_run_logger
-from src.prefect.ingest_topics_gcs import load_topics_to_gcs_bucket, request_topics
+from src.prefect.generic_tasks import (
+    request_unsplash,
+    response_data_to_df,
+    store_response_df_to_gcs_bucket,
+)
 
 
-def test_request_topics_successful():
+def test_request_unsplash_successful():
     with disable_run_logger():
-        response_json = request_topics.fn()
-        assert len(response_json) > 0
+        response_json = request_unsplash.fn(endpoint="/topics/")
+        assert len(response_json) > 0  # Assert that Dictionairy is not empty
 
 
-def load_topics_to_gcs_bucket_successful():
+def test_response_data_to_df_conversion_succeeded():
     with disable_run_logger():
         response_json = [
             {
@@ -218,5 +223,24 @@ def load_topics_to_gcs_bucket_successful():
                 "visibility": "featured",
             }
         ]
-        blob = load_topics_to_gcs_bucket.fn(response_json)
+        df = response_data_to_df.fn(
+            response_json=response_json, response_data_name="test"
+        )
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+
+def test_store_response_df_to_gcs_bucket_succeeded():
+    with disable_run_logger():
+        response_data = {
+            "Name": ["Alice", "Bob", "Charlie", "David"],
+            "Age": [25, 30, 35, 40],
+            "City": ["New York", "Los Angeles", "Chicago", "Houston"],
+        }
+
+        df = pd.DataFrame(response_data)
+        blob = store_response_df_to_gcs_bucket.fn(
+            df=df, response_data_name="unit-tests", env="dev"
+        )
         assert isinstance(blob, storage.blob.Blob)
+        assert blob.size > 0  # Size is greater than 0 if the blob contains data
