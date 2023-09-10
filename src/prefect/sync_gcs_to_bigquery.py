@@ -86,7 +86,7 @@ def sync_gcs_and_bigquery_table(
 
 @flow
 @timer
-def sync_topics_gcs_to_bigquery(table_name: str, source_uri: str, file_format: str):
+def sync_gcs_to_bigquery(table_name: str, source_uri: str, file_format: str):
     """Sync Google Cloud Storage with Bigquery Table using Push pattern"""
 
     logger = get_run_logger()
@@ -106,7 +106,7 @@ def sync_topics_gcs_to_bigquery(table_name: str, source_uri: str, file_format: s
 
 
 if __name__ == "__main__":
-    sync_topics_gcs_to_bigquery(
+    sync_gcs_to_bigquery(
         table_name="topics",
         source_uri="gs://unsplash-topics-dev/*.parquet",
         file_format="PARQUET",
