@@ -15,7 +15,26 @@ def test_request_unsplash_successful():
         assert len(response_json) > 0  # Assert that Dictionairy is not empty
 
 
-def test_response_data_to_df_conversion_succeeded():
+def test_flat_response_data_to_df_conversion_succeeded():
+    with disable_run_logger():
+        response_json = {
+            "downloads": 103124778,
+            "views": 12296623903,
+            "new_photos": 89908,
+            "new_photographers": 2158,
+            "new_pixels": 1722181932213,
+            "new_developers": 11025,
+            "new_applications": 276,
+            "new_requests": 1415432951,
+        }
+        df = response_data_to_df.fn(
+            response_json=response_json, response_data_name="test"
+        )
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+
+def test_nested_response_data_to_df_conversion_succeeded():
     with disable_run_logger():
         response_json = [
             {
