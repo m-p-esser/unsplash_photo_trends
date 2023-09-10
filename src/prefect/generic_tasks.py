@@ -46,7 +46,9 @@ def request_unsplash(endpoint: str) -> list[dict]:
         )
 
     response_json = response.json()
-    logger.info(f"Response contains data for {len(response_json)} topics")
+    logger.info(
+        f"Response contains data for {len(response_json)} entries (rows or columns)"
+    )
 
     return response_json
 
@@ -55,16 +57,29 @@ def request_unsplash(endpoint: str) -> list[dict]:
 @timer
 def response_data_to_df(response_json: dict, response_data_name: str) -> pd.DataFrame:
     """Store Response data as in Dataframe"""
+
     logger = get_run_logger()
 
-    with NamedTemporaryFile(delete=True, suffix=".jsonl") as temp_jsonl:
-        logger.info(f"Writing {response_data_name} data to file {temp_jsonl.name}")
+    with NamedTemporaryFile(delete=True, suffix=".jsonl") as temp_file:
+        logger.info(f"Writing {response_data_name} data to file {temp_file.name}")
 
-        for item in response_json:
-            item_string = json.dumps(item) + "\n"
-            temp_jsonl.write(item_string.encode())
+        if isinstance(response_json, list):
+            if isinstance(response_json[0], dict):
+                for item in response_json:
+                    item_string = json.dumps(item) + "\n"
+                    temp_file.write(item_string.encode())
 
-        df = pd.read_json(temp_jsonl.name, lines=True)
+                df = pd.read_json(temp_file.name, lines=True)
+
+        elif isinstance(response_json, dict):
+            data = {
+                k: [v] for k, v in response_json.items()
+            }  # Dataframe expects {'key1': ['value1], 'key2': ['value2]}
+            df = pd.DataFrame(data)
+
+        else:
+            raise ValueError(f"No parsing method for {type(response_json)} implemented")
+
         df["requested_data_at"] = datetime.datetime.now()
         logger.info(
             f"The Dataframe contains {df.shape[1]} columns and {df.shape[0]} rows"
