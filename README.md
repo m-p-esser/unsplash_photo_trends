@@ -76,8 +76,19 @@ As mentioned above, this project requires a Prefect account and access to the Pr
 Setup the storage infrastructure by running
 - `make create-gcs-buckets`
 
-### Deploy 
-If there are updates to the Prefect runner base image (Dockerfile under `images/prefect_runner/Dockerfile`) run the following command:
-- `make push-prefect-runner-image`
+### Deployment and Testing
 
-Then run the deploy command for a specific flow, e.g. `make deploy-healthcheck`
+Start on `develop`
+- Write Tasks and Flows
+- If necessary write Unit Tests
+- Run `make run-unit-tests`
+- Run Integration Tests
+
+Move on to `test`
+- Run Integration Tests (ensures that the Docker image is updated in Artifact Registry)
+- Deploy Flow
+- Sync with Bigquery (using existing Flow)
+
+Move on `prod`
+- Repeat the steps from `test`
+
