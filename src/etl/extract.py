@@ -1,13 +1,9 @@
 """ Collection of Extraction functions """
 
-########## GCP ##############
-
-import requests
 from google.cloud import storage
 from prefect_gcp import GcpCredentials
 
-from prefect import get_run_logger
-from prefect.blocks.system import Secret
+########## GCP ##############
 
 
 def download_blob_to_file(
@@ -51,41 +47,3 @@ def download_blob_into_memory(
     contents = blob.download_as_string()
 
     return contents
-
-
-########## Request ##############
-
-
-def request_unsplash(endpoint: str) -> list[dict]:
-    """Request data from Unsplash API"""
-    logger = get_run_logger()
-
-    UNSPLASH_ACCESS_KEY = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
-    BASE_URL = "https://api.unsplash.com"
-    URI = BASE_URL + endpoint
-
-    logger.info(f"Requesting endpoint: {URI}")
-    response = requests.get(
-        url=URI, params={"client_id": UNSPLASH_ACCESS_KEY, "per_page": 30}
-    )
-
-    response.raise_for_status()
-
-    rate_limit_limit = int(response.headers["X-Ratelimit-Limit"])
-    rate_limit_remaining = int(response.headers["X-Ratelimit-Remaining"])
-    consumed_quota = (rate_limit_limit - rate_limit_remaining) / rate_limit_limit
-
-    if consumed_quota > 0.8:
-        logger.warning(
-            f"Rate limit almost reached: {consumed_quota}%% of Quota consumed."
-        )
-
-    if rate_limit_remaining == 0:
-        logger.error(
-            f"Rate limit reached: {consumed_quota}%% of Quota consumed. Wait to continue"
-        )
-
-    response_json = response.json()
-    logger.info(f"Response contains data for {len(response_json)} topics")
-
-    return response_json
