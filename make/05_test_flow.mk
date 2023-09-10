@@ -14,4 +14,9 @@ integration-test-healthcheck: ## Integration Test Healthcheck Flow
 .PHONY: integration-test-ingest-topics-gcs
 integration-test-ingest-topics-gcs: ## Integration Test Ingest Topics GCS Flow
 	make deploy-ingest-topics-gcs
-	prefect deployment run ingest-topics-gcs/ingest-topics-gcs-test
+	prefect deployment run ingest-topics-gcs/ingest-topics-gcs-${ENV}
+
+.PHONY: integration-test-ingest-monthly-platform-stats-gcs
+integration-test-ingest-monthly-platform-stats-gcs: ## Integration Test Ingest Monthly Platform Stats GCS Flow
+	make deploy-ingest-monthly-platform-stats-gcs
+	prefect deployment run ingest-monthly-platform-stats-gcs/ingest-monthly-platform-stats-gcs-${ENV}
