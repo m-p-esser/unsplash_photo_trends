@@ -13,5 +13,5 @@ integration-test-healthcheck: ## Integration Test Healthcheck Flow
 
 .PHONY: integration-test-ingest-topics-gcs
 integration-test-ingest-topics-gcs: ## Integration Test Ingest Topics GCS Flow
-	make env-init
-	python3 src/prefect/ingest_topics_gcs.py
+	make deploy-ingest-topics-gcs
+	prefect deployment run ingest-topics-gcs/ingest-topics-gcs-test
