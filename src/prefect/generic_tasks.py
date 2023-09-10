@@ -85,7 +85,7 @@ def store_response_df_to_gcs_bucket(
         df.to_parquet(temp_parquet.name)
 
         today = datetime.date.today().strftime("%Y%m%d")
-        blob_name = f"topics_{today}.parquet"
+        blob_name = f"{response_data_name}_{today}.parquet"
         blob = upload_blob_from_file(
             bucket_name=f"unsplash-{response_data_name}-{env}",
             source_file_name=temp_parquet.name,
