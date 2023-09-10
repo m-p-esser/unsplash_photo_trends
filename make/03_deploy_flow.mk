@@ -58,7 +58,7 @@ deploy-sync-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery
 		--name sync-gcs-to-bigquery \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/sync-gcs-to-bigquery-${ENV}-deployment.yaml \
+		--output deployments/sync-gcs-to-bigquery-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"table_name": "topics", "source_uri": "gs://unsplash-topics-${ENV}/*.parquet", "file_format": "PARQUET"}' \
 		--apply
