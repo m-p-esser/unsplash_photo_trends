@@ -16,18 +16,18 @@ from src.utils import timer
 
 @task(retries=3, retry_delay_seconds=10)
 @timer
-def request_unsplash(endpoint: str) -> list[dict]:
+def request_unsplash(
+    endpoint: str, params: dict = {"per_page": 30}
+) -> requests.Response:
     """Request data from Unsplash API"""
     logger = get_run_logger()
 
-    UNSPLASH_ACCESS_KEY = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
+    params["client_id"] = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
     BASE_URL = "https://api.unsplash.com"
     URI = BASE_URL + endpoint
 
     logger.info(f"Requesting endpoint: {URI}")
-    response = requests.get(
-        url=URI, params={"client_id": UNSPLASH_ACCESS_KEY, "per_page": 30}
-    )
+    response = requests.get(url=URI, params=params)
 
     response.raise_for_status()
 
@@ -45,7 +45,17 @@ def request_unsplash(endpoint: str) -> list[dict]:
             f"Rate limit reached: {consumed_quota}%% of Quota consumed. Wait to continue"
         )
 
+    return response
+
+
+@task(retries=3, retry_delay_seconds=10)
+@timer
+def parse_response(response: requests.Response) -> dict:
+    """Convert Response to Dict"""
+    logger = get_run_logger()
+
     response_json = response.json()
+
     logger.info(
         f"Response contains data for {len(response_json)} entries (rows or columns)"
     )
