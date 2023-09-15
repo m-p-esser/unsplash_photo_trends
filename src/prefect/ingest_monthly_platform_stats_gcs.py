@@ -2,6 +2,7 @@
 
 from prefect import flow
 from src.prefect.generic_tasks import (
+    parse_response,
     request_unsplash,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
@@ -27,7 +28,8 @@ def ingest_monthly_platform_stats_gcs():
     """Flow to load monthly stats from Unsplash and store them in a Google Cloud Storage Bucket"""
     # Call the function with the directory you want to start from
 
-    response_json = request_monthly_platform_stats()
+    response = request_monthly_platform_stats()
+    response_json = parse_response(response)
     env_variables = load_env_variables()
     env = env_variables["ENV"]  # dev, test or prod
 
