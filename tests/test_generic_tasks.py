@@ -1,8 +1,12 @@
+import json
+
 import pandas as pd
+import requests
 from google.cloud import storage
 
 from prefect.logging import disable_run_logger
 from src.prefect.generic_tasks import (
+    parse_response,
     request_unsplash,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
@@ -11,8 +15,23 @@ from src.prefect.generic_tasks import (
 
 def test_request_unsplash_successful():
     with disable_run_logger():
-        response_json = request_unsplash.fn(endpoint="/topics/")
-        assert len(response_json) > 0  # Assert that Dictionairy is not empty
+        response = request_unsplash.fn(endpoint="/topics/")
+        assert response.status_code == 200
+
+
+def test_parse_response_successful():
+    with disable_run_logger():
+        # Create an instance of the Response object
+        response = requests.Response()
+
+        # Manually set some attributes
+        response.status_code = 200
+        response._content = json.dumps({"message": "Hello, World!"}).encode("utf-8")
+        response.url = "http://example.com"
+        response.headers = {"Content-Type": "application/json"}
+
+        response_json = parse_response.fn(response)
+        assert isinstance(response_json, dict)
 
 
 def test_flat_response_data_to_df_conversion_succeeded():
