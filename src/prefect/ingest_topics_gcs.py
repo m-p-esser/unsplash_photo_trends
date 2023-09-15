@@ -2,6 +2,7 @@
 
 from prefect import flow
 from src.prefect.generic_tasks import (
+    parse_response,
     request_unsplash,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
@@ -27,7 +28,8 @@ def ingest_topics_gcs():
     """Flow to load topics from Unsplash and store them in a Google Cloud Storage Bucket"""
     # Call the function with the directory you want to start from
 
-    response_json = request_topics()
+    response = request_topics()
+    response_json = parse_response(response)
     env_variables = load_env_variables()
     env = env_variables["ENV"]  # dev, test or prod
 
