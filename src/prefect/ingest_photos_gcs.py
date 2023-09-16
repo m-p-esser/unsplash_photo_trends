@@ -7,6 +7,8 @@ from google.cloud import storage
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger, task
+
+# from prefect.tasks import task_input_hash
 from prefect.task_runners import ConcurrentTaskRunner
 from src.etl.load import upload_blob_from_memory
 from src.prefect.generic_tasks import (
@@ -29,7 +31,7 @@ def request_photos(params: dict):
     return response
 
 
-@flow  # Subflow (2nd level)
+@flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
 def request_first_page(
     params: dict = {"per_page": 30, "page": 1, "order_by": "oldest"}
 ):
@@ -50,7 +52,7 @@ def request_first_page(
     return response
 
 
-@task  # Task (3rd level)
+@task(retries=3, retry_delay_seconds=3)  # Task (3rd level)
 def _upload_photo_metadata_as_blob(
     response,
     photo_metadata: dict,
@@ -76,14 +78,15 @@ def _upload_photo_metadata_as_blob(
     photo_id = photo["payload"]["id"]
     blob_name = f"{photo_id}.json"
     bytes = json.dumps(photo).encode("utf-8")
-    blob = upload_blob_from_memory(
-        bucket_name, bytes, blob_name, gcp_credential_block_name
-    )
-
-    return blob
+    upload_blob_from_memory(bucket_name, bytes, blob_name, gcp_credential_block_name)
 
 
-@flow(task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
+@flow(
+    retries=3,
+    retry_delay_seconds=10,
+    timeout_seconds=120,
+    task_runner=ConcurrentTaskRunner(),
+)  # Subflow (2nd level)
 @timer
 def upload_photo_metadata_to_gcs(
     response,
@@ -94,7 +97,7 @@ def upload_photo_metadata_to_gcs(
 ):
     """Asychronously upload photo metadata as blob to Google Cloud Storage Bucket"""
 
-    logger = get_run_logger()
+    get_run_logger()
 
     for photo_metadata in response_json:
         _upload_photo_metadata_as_blob.submit(
@@ -104,10 +107,6 @@ def upload_photo_metadata_to_gcs(
             bucket_name,
             page_counter,
         )
-
-    logger.info(
-        f"Uploaded {len(response_json)} blobs to Google Cloud Storage Bucket: {bucket_name}"
-    )
 
 
 @flow  # Main Flow (1st level)
@@ -159,6 +158,9 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
             gcp_credential_block_name,
             bucket_name,
             page_counter,
+        )
+        logger.info(
+            f"Uploaded {len(response_json)} blobs to Google Cloud Storage Bucket: {bucket_name}"
         )
 
         number_new_stored_images += params["per_page"]
