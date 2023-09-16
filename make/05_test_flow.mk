@@ -20,3 +20,8 @@ integration-test-ingest-topics-gcs: ## Integration Test Ingest Topics GCS Flow
 integration-test-ingest-monthly-platform-stats-gcs: ## Integration Test Ingest Monthly Platform Stats GCS Flow
 	make deploy-ingest-monthly-platform-stats-gcs
 	prefect deployment run ingest-monthly-platform-stats-gcs/ingest-monthly-platform-stats-gcs-${ENV}
+
+.PHONY: integration-test-ingest-photos-gcs
+integration-test-ingest-photos-gcs: ## Integration Test Ingest Photos GCS Flow
+	make deploy-ingest-photos-gcs
+	prefect deployment run ingest-photos-gcs/ingest-photos-gcs-${ENV}
