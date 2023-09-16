@@ -30,7 +30,6 @@ def request_photos(params: dict):
 
 
 @flow  # Subflow (2nd level)
-@timer
 def request_first_page(
     params: dict = {"per_page": 30, "page": 1, "order_by": "oldest"}
 ):
@@ -52,7 +51,6 @@ def request_first_page(
 
 
 @task  # Task (3rd level)
-@timer
 def _upload_photo_metadata_as_blob(
     response,
     photo_metadata: dict,
@@ -171,7 +169,9 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
         # Break the Loop if all pages have been processed
         page_counter += 1
         if page_counter > last_page_number:
-            logger.info("Downloaded all Editorial images from platform")
+            logger.info(
+                "Downloaded metadata for all Editorial images of Unsplash platform"
+            )
             break
 
         # Break the Loop if no more requests are possible
@@ -179,6 +179,13 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
         if requests_left == 0:
             logger.info(
                 "No more requests left as Rate Limit is reached. Need to wait an hour"
+            )
+            break
+
+        # Break the Loop if 300 images have been collected to avoid "OSError: [Errno 24] Too many open files"
+        if number_new_stored_images == 300:
+            logger.info(
+                "Downloaded metadata for 300 Editorial images of Unsplash platform"
             )
             break
 
