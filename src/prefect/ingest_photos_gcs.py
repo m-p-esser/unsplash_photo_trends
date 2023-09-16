@@ -142,7 +142,7 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
     last_page_number = processing_progress["last_page_number"]
 
     page_counter = start_page_number
-    number_new_stored_images = 0
+    number_stored_images = 0
 
     while True:
         # Request single page of endpoint
@@ -168,9 +168,9 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
             f"Uploaded {len(response_json)} blobs to Google Cloud Storage Bucket: {bucket_name}"
         )
 
-        number_new_stored_images += params["per_page"]
+        number_stored_images += params["per_page"]
         logger.info(
-            f"Number of new stored images in this data collection run: {number_new_stored_images}"
+            f"Number of stored images in this data collection run: {number_stored_images}"
         )
 
         # Break the Loop if all pages have been processed
@@ -190,7 +190,7 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
             break
 
         # Break the Loop if 300 images have been collected to avoid "OSError: [Errno 24] Too many open files"
-        if number_new_stored_images == 300:
+        if number_stored_images == 300:
             logger.info(
                 "Downloaded metadata for 300 Editorial images of Unsplash platform"
             )
