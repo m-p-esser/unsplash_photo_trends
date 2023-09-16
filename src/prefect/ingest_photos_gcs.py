@@ -2,14 +2,14 @@
 
 import json
 import math
+from datetime import timedelta
 
 from google.cloud import storage
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger, task
-
-# from prefect.tasks import task_input_hash
 from prefect.task_runners import ConcurrentTaskRunner
+from prefect.tasks import task_input_hash
 from src.etl.load import upload_blob_from_memory
 from src.prefect.generic_tasks import (
     count_number_stored_files_in_gcs_bucket,
@@ -52,7 +52,12 @@ def request_first_page(
     return response
 
 
-@task(retries=3, retry_delay_seconds=3)  # Task (3rd level)
+@task(
+    retries=3,
+    retry_delay_seconds=3,
+    cache_key_fn=task_input_hash,
+    cache_expiration=timedelta(hours=1),
+)  # Task (3rd level)
 def _upload_photo_metadata_as_blob(
     response,
     photo_metadata: dict,
