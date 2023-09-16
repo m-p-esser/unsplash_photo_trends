@@ -1,11 +1,15 @@
 import json
 
 import pandas as pd
+import pytest
 import requests
 from google.cloud import storage
+from prefect_gcp import GcpCredentials
 
 from prefect.logging import disable_run_logger
 from src.prefect.generic_tasks import (
+    count_number_stored_files_in_gcs_bucket,
+    get_processing_progress_from_response_header,
     parse_response,
     request_unsplash,
     response_data_to_df,
@@ -282,3 +286,106 @@ def test_store_response_df_to_gcs_bucket_succeeded():
         )
         assert isinstance(blob, storage.blob.Blob)
         assert blob.size > 0  # Size is greater than 0 if the blob contains data
+
+
+def test_count_number_stored_files_in_gcs_bucket_at_least_one_file():
+    with disable_run_logger():
+        gcp_credentials = GcpCredentials.load("unsplash-photo-trends-deployment-sa")
+        storage_client = gcp_credentials.get_cloud_storage_client()
+        number_stored_files = count_number_stored_files_in_gcs_bucket.fn(
+            storage_client, "bucket-with-one-file"
+        )
+        assert number_stored_files == 1
+
+
+@pytest.fixture
+def sample_response_with_header():
+    # Create an instance of the Response object
+    response = requests.Response()
+    response.headers = {
+        "Connection": "keep-alive",
+        "Content-Length": "9785",
+        "Server": "Cowboy",
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Request-Method": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Expose-Headers": "Link,X-Total,X-Per-Page,X-RateLimit-Limit,X-RateLimit-Remaining",
+        "Cache-Control": "max-age=7200,stale-if-error=3600,stale-while-revalidate=60",
+        "X-Unsplash-Version": "v1",
+        "Link": '<https://api.unsplash.com/photos?client_id=SER34TTb7y6FyGzcFRwsI2QZs6a1q5Hx4j-PQhlbeTY&order_by=oldest&page=1&per_page=30>; rel="first", <https://api.unsplash.com/photos?client_id=SER34TTb7y6FyGzcFRwsI2QZs6a1q5Hx4j-PQhlbeTY&order_by=oldest&page=2&per_page=30>; rel="prev", <https://api.unsplash.com/photos?client_id=SER34TTb7y6FyGzcFRwsI2QZs6a1q5Hx4j-PQhlbeTY&order_by=oldest&page=9802&per_page=30>; rel="last", <https://api.unsplash.com/photos?client_id=SER34TTb7y6FyGzcFRwsI2QZs6a1q5Hx4j-PQhlbeTY&order_by=oldest&page=4&per_page=30>; rel="next"',
+        "X-Total": "294035",
+        "X-Per-Page": "30",
+        "X-Powered-By": "hero-app",
+        "Content-Language": "en",
+        "Etag": 'W/"cc43d9041ced73c6ef38c6a008f0084b"',
+        "X-Ratelimit-Limit": "50",
+        "X-Ratelimit-Remaining": "45",
+        "X-Request-Id": "c3ca0ee5-886b-4e76-aec0-f2a6aa7962c4",
+        "X-Runtime": "0.077599",
+        "Content-Encoding": "gzip",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "Via": "1.1 vegur, 1.1 varnish, 1.1 varnish",
+        "Accept-Ranges": "bytes",
+        "Date": "Sat, 16 Sep 2023 09:02:51 GMT",
+        "Age": "1945",
+        "X-Served-By": "cache-iad-kiad7000098-IAD, cache-fra-eddf8230023-FRA",
+        "X-Cache": "MISS, HIT",
+        "X-Cache-Hits": "0, 1",
+        "X-Timer": "S1694854971.066461,VS0,VE115",
+        "Vary": "Accept-Encoding,Authorization,Accept-Language,client-geo-region,Accept",
+    }
+
+    return response
+
+
+def test_get_processing_progress_from_response_header_all_keys_available(
+    sample_response_with_header,
+):
+    with disable_run_logger():
+        processing_progress = get_processing_progress_from_response_header.fn(
+            sample_response_with_header, 30
+        )
+        assert len(processing_progress.keys()) == 5
+
+
+def test_get_processing_progress_from_response_header_remaining_objects_to_request(
+    sample_response_with_header,
+):
+    with disable_run_logger():
+        processing_progress = get_processing_progress_from_response_header.fn(
+            sample_response_with_header, 30
+        )
+        assert processing_progress["remaining_number_objects_to_request"] == 294005
+
+
+def test_get_processing_progress_from_response_header_last_page_number(
+    sample_response_with_header,
+):
+    with disable_run_logger():
+        processing_progress = get_processing_progress_from_response_header.fn(
+            sample_response_with_header, 30
+        )
+        assert processing_progress["last_page_number"] == 9802
+
+
+def test_get_processing_progress_from_response_header_number_processed_pages_complete_batch(
+    sample_response_with_header,
+):
+    """A complete batch contains 30 objects/files"""
+    with disable_run_logger():
+        processing_progress = get_processing_progress_from_response_header.fn(
+            sample_response_with_header, 30
+        )
+        assert processing_progress["number_processed_pages"] == 1
+
+
+def test_get_processing_progress_from_response_header_number_processed_pages_incomplete_batch(
+    sample_response_with_header,
+):
+    """A complete batch contains 30 objects/files"""
+    with disable_run_logger():
+        processing_progress = get_processing_progress_from_response_header.fn(
+            sample_response_with_header, 15
+        )
+        assert processing_progress["number_processed_pages"] == 0
