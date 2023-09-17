@@ -64,7 +64,7 @@ deploy-ingest-photos-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 		--output deployments/ingest-topics-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa"}' \
-		--cron "*/12 * * * *" \
+		--cron "*/15 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
 

@@ -191,10 +191,10 @@ def ingest_photos_gcs(gcp_credential_block_name: str):
             )
             break
 
-        # Break the Loop if 300 images have been collected to avoid "OSError: [Errno 24] Too many open files"
-        if number_stored_images == 300:
+        # Break the Loop if 450 images have been collected to avoid "OSError: [Errno 24] Too many open files"
+        if number_stored_images == 450:
             logger.info(
-                "Downloaded metadata for 300 Editorial images of Unsplash platform"
+                "Downloaded metadata for 450 Editorial images of Unsplash platform"
             )
             break
 
