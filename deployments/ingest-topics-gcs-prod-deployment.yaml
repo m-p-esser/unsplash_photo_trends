@@ -12,7 +12,7 @@ tags: []
 parameters:
   gcp_credential_block_name: unsplash-photo-trends-deployment-sa
 schedule:
-  cron: '*/12 * * * *'
+  cron: '*/15 * * * *'
   timezone: Europe/Berlin
   day_or: true
 is_schedule_active: true
@@ -86,5 +86,5 @@ parameter_openapi_schema:
   required:
   - gcp_credential_block_name
   definitions: null
-timestamp: '2023-09-17T18:16:17.447799+00:00'
+timestamp: '2023-09-17T18:30:42.000914+00:00'
 triggers: []
