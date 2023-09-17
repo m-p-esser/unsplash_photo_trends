@@ -67,6 +67,8 @@ def _upload_photo_metadata_as_blob(
 ) -> storage.blob.Blob:
     """Upload single photo metadata as blob to Google Cloud Storage Bucket"""
 
+    logger = get_run_logger()
+
     photo = {
         "payload": photo_metadata,
         "request_metadata": {
@@ -83,6 +85,8 @@ def _upload_photo_metadata_as_blob(
     photo_id = photo["payload"]["id"]
     blob_name = f"{photo_id}.json"
     bytes = json.dumps(photo).encode("utf-8")
+
+    logger.info(f"Uploading '{blob_name}' to {bucket_name}")
     upload_blob_from_memory(bucket_name, bytes, blob_name, gcp_credential_block_name)
 
 
@@ -101,8 +105,6 @@ def upload_photo_metadata_to_gcs(
     page_counter: int,
 ):
     """Asychronously upload photo metadata as blob to Google Cloud Storage Bucket"""
-
-    get_run_logger()
 
     for photo_metadata in response_json:
         _upload_photo_metadata_as_blob.submit(
