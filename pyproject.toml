@@ -6,7 +6,8 @@ authors = ["Marc-Philipp Esser <m-esser@mail.de>"]
 readme = "README.md"
 packages = [
     {include = "src"},
-    {include = "etl", from = "src"}
+    {include = "etl", from = "src"},
+    {include = "scraper", from = "src"}
     ]
 
 [tool.poetry.dependencies]
@@ -20,6 +21,8 @@ prefect-github = "^0.1.5"
 google-cloud = "^0.34.0"
 google-cloud-bigquery = "^3.11.4"
 pyarrow = "^13.0.0"
+beautifulsoup4 = "^4.12.2"
+scrapy = "^2.11.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
