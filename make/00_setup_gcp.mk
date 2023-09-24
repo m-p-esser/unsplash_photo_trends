@@ -2,6 +2,8 @@
 
 .PHONY: create-gcp-project
 create-gcp-project: ## Create new GCP Project
+	@echo "Set main account as default account"
+	gcloud config set account $(GCP_MAIN_ACCOUNT)
 	@echo "Create new project"
 	gcloud projects create $(GCP_PROJECT_ID)
 	@echo "Check if project is created"
@@ -33,11 +35,6 @@ create-deployment-service-account-key-file: ## Create GCP Keyfile for Deployment
 	gcloud iam service-accounts keys create .secrets/deployment_sa_account.json \
 --iam-account=$(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com
 
-.PHONY: set-deployment-service-account-as-default
-set-deployment-service-account-as-default: ## Set Deployment SA as default
-	gcloud auth activate-service-account $(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com --key-file .secrets/deployment_sa_account.json
-	gcloud config set account $(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com
-
 .PHONY: enable-gcp-services
 enable-gcp-services: ## Enable GCP services
 	@echo "Enabling GCP services..."
@@ -63,6 +60,11 @@ bind-iam-policies-to-deployment-service-account: ## Bind IAM Policies to Service
 	gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com --role="roles/dataproc.worker"
 # Grant your Google Account a role that lets you use the service account's roles and attach the service account to other resources:
 	gcloud iam service-accounts add-iam-policy-binding $(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com --member="user:emarcphilipp@gmail.com" --role=roles/iam.serviceAccountUser
+
+.PHONY: set-deployment-service-account-as-default
+set-deployment-service-account-as-default: ## Set Deployment SA as default
+	gcloud auth activate-service-account $(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com --key-file .secrets/deployment_sa_account.json
+	gcloud config set account $(GCP_DEPLOYMENT_SERVICE_ACCOUNT)@$(GCP_PROJECT_ID).iam.gserviceaccount.com
 
 .PHONY: setup-gcp
 setup-gcp: ## Setup GCP Project so it can be used for development, CI or production
