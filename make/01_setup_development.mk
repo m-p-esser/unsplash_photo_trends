@@ -36,10 +36,11 @@ env-init: ## Initialize environment, required everytime before the development p
 			;; \
 	esac;
 
-.PHONY: dev-init
-dev-init: ## Setup environment, so it can be used for dev, test or prod environment
 	@echo "Activating Poetry Shell"
 	poetry shell
+
+.PHONY: dev-init
+dev-init: ## Setup environment, so it can be used for dev, test or prod environment
 	@echo "Set GCP Service account as standard service account"
 	"$(MAKE)" gcp-init
 	@echo "Logging into Prefect Cloud"
