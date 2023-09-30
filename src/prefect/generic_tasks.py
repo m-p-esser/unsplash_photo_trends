@@ -51,6 +51,49 @@ def request_unsplash(
 
 @task(retries=3, retry_delay_seconds=10)
 @timer
+def request_unsplash_napi(
+    endpoint: str, params: dict = {"per_page": 30}, zenrows_api_key: str = None
+) -> requests.Response:
+    """Request data from Unsplash API (napi, Backend API)"""
+    logger = get_run_logger()
+
+    # Check Credits
+    response = requests.get(
+        f"https://api.zenrows.com/v1/usage?apikey={zenrows_api_key}"
+    )
+
+    response.raise_for_status()
+
+    credit_limit = int(response.json()["api_credit_limit"])
+    credits_remaining = int(response.json()["api_credit_usage"])
+    consumed_quota = (credit_limit - credits_remaining) / credit_limit
+
+    if consumed_quota > 0.8:
+        logger.warning(
+            f"Credit limit almost reached: {consumed_quota}%% of Quota consumed."
+        )
+
+    if credits_remaining == 0:
+        logger.error(
+            f"Credit limit reached: {consumed_quota}%% of Quota consumed. Wait to continue"
+        )
+
+    # Data Collection
+    BASE_URL = "https://unsplash.com/napi"
+    URI = BASE_URL + endpoint
+    proxy = f"http://{zenrows_api_key}:@proxy.zenrows.com:8001"
+    proxies = {"http": proxy, "https": proxy}
+
+    logger.info(f"Requesting endpoint: {URI}")
+    response = requests.get(url=URI, params=params, proxies=proxies, verify=False)
+
+    response.raise_for_status()
+
+    return response
+
+
+@task(retries=3, retry_delay_seconds=10)
+@timer
 def parse_response(response: requests.Response) -> dict:
     """Convert Response to Dict"""
     logger = get_run_logger()
