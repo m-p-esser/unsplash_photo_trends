@@ -237,7 +237,6 @@ def ingest_photos_napi_gcs(
     logger.info(f"The last requested page number is: {last_requested_page}")
 
     # Counter
-    total_number_pages = 2  # just for testing
     next_page = last_requested_page + 1
     number_stored_images = 0
 
