@@ -120,8 +120,9 @@ def get_last_requested_page_from_logs(
         """
 
     result = bigquery_query(query, gcp_credentials, location=location)
-
-    last_requested_page = result[0][0]  # First Row and Column
+    first_row = result[0]
+    first_row_values = first_row.values()
+    last_requested_page = first_row_values[0]
 
     if last_requested_page is None:
         last_requested_page = 0
@@ -255,7 +256,10 @@ def ingest_photos_napi_gcs(
         params["page"] = next_page
         params["order_by"] = "oldest"
 
+        sleep_time_seconds = randint(1, 3)
+        logger.info(f"Sleeping for {sleep_time_seconds} seconds")
         time.sleep(randint(1, 3))
+
         response = request_photos_napi(params, zen_rows_api_key)
         logger.info(f"Response headers: \n {response.headers}")
         response_json = parse_response(response)
