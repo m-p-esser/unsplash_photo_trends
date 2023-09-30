@@ -12,6 +12,7 @@ create-prefect-blocks: ## Create Prefect Blocks
 	prefect block register --file src/blocks/create_google_cloud_run.py
 	prefect block register --file src/blocks/create_unsplash_access_key.py
 	prefect block register --file src/blocks/create_bigquery.py
+	prefect block register --file src/blocks/create_zenrows_api_key.py
 
 .PHONY: create-prefect-artifact-repository
 create-prefect-artifact-repository: ## Create GCP Artificat Repository for Prefect Flows
