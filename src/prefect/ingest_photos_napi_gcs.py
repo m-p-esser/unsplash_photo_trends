@@ -283,10 +283,10 @@ def ingest_photos_napi_gcs(
             gcp_credentials, request_id, request_url, params, env
         )
 
-        # Break the Loop if 450 images have been collected to avoid "OSError: [Errno 24] Too many open files"
-        if number_stored_images == 450:
+        # Break the Loop if 300 images have been collected to avoid "OSError: [Errno 24] Too many open files"
+        if number_stored_images == 300:
             logger.info(
-                "Downloaded metadata for 450 Editorial images of Unsplash platform"
+                "Downloaded metadata for 300 Editorial images of Unsplash platform"
             )
             break
 
