@@ -25,3 +25,8 @@ integration-test-ingest-monthly-platform-stats-gcs: ## Integration Test Ingest M
 integration-test-ingest-photos-gcs: ## Integration Test Ingest Photos GCS Flow
 	make deploy-ingest-photos-gcs
 	prefect deployment run ingest-photos-gcs/ingest-photos-gcs-${ENV}
+
+.PHONY: integration-test-ingest-photos-napi-gcs
+integration-test-ingest-photos-napi-gcs: ## Integration Test Ingest Photos GCS Flow (using Backend API)
+	make deploy-ingest-photos-napi-gcs
+	prefect deployment run ingest-photos-napi-gcs/ingest-photos-napi-gcs-${ENV}
