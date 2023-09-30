@@ -30,8 +30,9 @@
 │   └── reports
 ├── references       --> Data dictionaries, manuals, and all other explanatory materials
 ├── src              --> Source code (Python)
+│   ├── blocks       --> Prefect Blocks
 │   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
-│   └── prefect      --> Prefect Flows
+│   ├── prefect      --> Prefect Flows
 │   └── scripts      --> Python utility scripts
 ├── tests            --> Unit tests
 ```
@@ -54,7 +55,7 @@ See https://docs.prefect.io/latest/api-ref/rest-api/#finding-your-prefect-cloud-
 ### GCP Setup
 Run `make setup-gcp` to setup up the Google Cloud Project
 
-If this doesn't work, run the commands from `00_00_setup_gcp.mk` command by command in the following order:
+If this doesn't work, run the commands from `01_setup_gcp.mk` command by command in the following order:
 - `make create-gcp-project`
 - `make set-default-gcp-project`
 - `make link-project-to-billing-account`
@@ -82,7 +83,6 @@ Start on `develop`
 - Write Tasks and Flows
 - If necessary write Unit Tests
 - Run `make run-unit-tests`
-- Run Integration Tests
 
 Move on to `test`
 - Merge with `develop`

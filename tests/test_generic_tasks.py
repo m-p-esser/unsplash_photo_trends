@@ -6,12 +6,14 @@ import requests
 from google.cloud import storage
 from prefect_gcp import GcpCredentials
 
+from prefect.blocks.system import Secret
 from prefect.logging import disable_run_logger
 from src.prefect.generic_tasks import (
     count_number_stored_files_in_gcs_bucket,
     get_processing_progress_from_response_header,
     parse_response,
     request_unsplash,
+    request_unsplash_napi,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
@@ -20,6 +22,15 @@ from src.prefect.generic_tasks import (
 def test_request_unsplash_successful():
     with disable_run_logger():
         response = request_unsplash.fn(endpoint="/topics/")
+        assert response.status_code == 200
+
+
+def test_request_unsplash_napi_successful():
+    with disable_run_logger():
+        zenrows_api_key = Secret.load("unsplash-photo-trends-zenrows-api-key").get()
+        response = request_unsplash_napi.fn(
+            endpoint="/photos", zenrows_api_key=zenrows_api_key
+        )
         assert response.status_code == 200
 
 
