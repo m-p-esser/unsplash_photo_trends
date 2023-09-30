@@ -79,7 +79,7 @@ deploy-ingest-photos-napi-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud R
 		--output deployments/ingest-topics-napi-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "zen_rows_api_key_block_name": "unsplash-photo-trends-zenrows-api-key", "per_page": 30 }' \
-		--cron "*/12 * * * *" \
+		--cron "*/10 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
 
