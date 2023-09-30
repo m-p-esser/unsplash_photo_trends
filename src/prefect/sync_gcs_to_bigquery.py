@@ -54,6 +54,7 @@ def sync_gcs_and_bigquery_table(
     bigquery_client: bigquery.client.Client,
     table_name: str,
     source_uri: str,
+    autodetect: bool,
     env: str = "dev",
     file_format: str = "PARQUET",
 ):
@@ -77,6 +78,7 @@ def sync_gcs_and_bigquery_table(
 
     external_config = bigquery.ExternalConfig(file_format)
     external_config.source_uris = [source_uri]
+    external_config.autodetect = autodetect
     table.external_data_configuration = external_config
 
     # Create a permanent table linked to the GCS file
@@ -87,7 +89,11 @@ def sync_gcs_and_bigquery_table(
 @flow
 @timer
 def sync_gcs_to_bigquery(
-    table_name: str, source_uri: str, file_format: str, env: str = "dev"
+    table_name: str,
+    source_uri: str,
+    autodetect: bool,
+    file_format: str,
+    env: str = "dev",
 ):
     """Sync Google Cloud Storage with Bigquery Table using Push pattern"""
 
@@ -97,6 +103,7 @@ def sync_gcs_to_bigquery(
         bigquery_client,
         table_name,
         source_uri,
+        autodetect,
         env,
         file_format,
     )
@@ -104,7 +111,9 @@ def sync_gcs_to_bigquery(
 
 if __name__ == "__main__":
     sync_gcs_to_bigquery(
-        table_name="topics",
-        source_uri="gs://unsplash-topics-dev/*.parquet",
-        file_format="PARQUET",
+        table_name="photos-editorial-metadata",
+        source_uri="gs://photos-editorial-metadata-test/*.json",
+        file_format="NEWLINE_DELIMITED_JSON",
+        env="test",
+        autodetect=True,
     )
