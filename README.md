@@ -83,7 +83,6 @@ Start on `develop`
 - Write Tasks and Flows
 - If necessary write Unit Tests
 - Run `make run-unit-tests`
-- Run Integration Tests
 
 Move on to `test`
 - Merge with `develop`
