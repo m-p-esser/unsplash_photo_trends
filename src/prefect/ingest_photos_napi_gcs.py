@@ -112,6 +112,8 @@ def get_last_requested_page_from_logs(
 ) -> int:
     """Get last requested page where photo metadata has been stored"""
 
+    logger = get_run_logger()
+
     query = f"""
             SELECT MAX(requested_page) as last_requested_page
             FROM `unsplash-photo-trends.{env}.photos-editorial-metadata-request-log`
@@ -123,6 +125,10 @@ def get_last_requested_page_from_logs(
 
     if last_requested_page is None:
         last_requested_page = 0
+
+    logger.info(
+        f"Last requested page in table 'unsplash-photo-trends.{env}.photos-editorial-metadata-request-log' from endpoint is '{last_requested_page}'"
+    )
 
     return last_requested_page
 
@@ -234,7 +240,9 @@ def ingest_photos_napi_gcs(
 
     # Get last requested page from Unsplash photo endpoint
     last_requested_page = get_last_requested_page_from_logs(gcp_credentials, env)
-    logger.info(f"The last requested page number is: {last_requested_page}")
+    logger.info(
+        f"Last requested page in table 'unsplash-photo-trends.{env}.photos-editorial-metadata-request-log' from endpoint is '{last_requested_page}'"
+    )
 
     # Counter
     next_page = last_requested_page + 1
