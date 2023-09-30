@@ -6,8 +6,7 @@ authors = ["Marc-Philipp Esser <m-esser@mail.de>"]
 readme = "README.md"
 packages = [
     {include = "src"},
-    {include = "etl", from = "src"},
-    {include = "scraper", from = "src"}
+    {include = "etl", from = "src"}
     ]
 
 [tool.poetry.dependencies]
