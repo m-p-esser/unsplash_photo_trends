@@ -240,13 +240,13 @@ def ingest_photos_napi_gcs(
     next_page = last_requested_page + 1
     number_stored_images = 0
 
-    # Init Params
-    params = {}
-    params["per_page"] = per_page
-    params["page"] = next_page
-    params["order_by"] = "oldest"
-
     while next_page <= total_number_pages:
+        # Init Params
+        params = {}
+        params["per_page"] = per_page
+        params["page"] = next_page
+        params["order_by"] = "oldest"
+
         time.sleep(randint(1, 3))
         response = request_photos_napi(params, zen_rows_api_key)
         logger.info(f"Response headers: \n {response.headers}")
