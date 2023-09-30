@@ -201,7 +201,7 @@ def write_request_log_to_bigquery(
 def ingest_photos_napi_gcs(
     gcp_credential_block_name: str,
     zen_rows_api_key_block_name: str,
-    params: dict,
+    per_page: int,
 ):
     """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
 
@@ -237,7 +237,9 @@ def ingest_photos_napi_gcs(
     next_page = last_requested_page + 1
     number_stored_images = 0
 
-    # Extend Params
+    # Init Params
+    params = {}
+    params["per_page"] = per_page
     params["page"] = next_page
     params["order_by"] = "oldest"
 
@@ -278,5 +280,5 @@ if __name__ == "__main__":
     ingest_photos_napi_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         zen_rows_api_key_block_name="unsplash-photo-trends-zenrows-api-key",
-        params={"per_page": 30},
+        per_page=30,
     )
