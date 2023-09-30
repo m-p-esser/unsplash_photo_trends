@@ -267,7 +267,9 @@ def ingest_photos_napi_gcs(
 
         request_id = response.headers["X-Request-Id"]
         request_url = response.headers["Zr-Final-Url"]
-        write_request_log_to_bigquery(gcp_credentials, request_id, request_url, params)
+        write_request_log_to_bigquery(
+            gcp_credentials, request_id, request_url, params, env
+        )
 
         # Break the Loop if 450 images have been collected to avoid "OSError: [Errno 24] Too many open files"
         if number_stored_images == 450:
