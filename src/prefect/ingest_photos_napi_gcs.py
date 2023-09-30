@@ -170,7 +170,9 @@ def write_request_log_to_bigquery(
 
         bigquery_query(query, gcp_credentials, query_params, location=location)
 
-        logger.info(f"Updated existing log entry for Request URL: {request_url}")
+        logger.info(
+            f"Updated existing log entry for Request URL '{request_url}' in table `unsplash-photo-trends.{env}.photos-editorial-metadata-request-log`"
+        )
 
     if len(row) == 0:
         query = f"""
@@ -188,7 +190,9 @@ def write_request_log_to_bigquery(
 
         bigquery_query(query, gcp_credentials, query_params, location=location)
 
-        logger.info(f"Add new log entry for Request URL: {request_url}")
+        logger.info(
+            f"Add new log entry for Request URL '{request_url}' in table `unsplash-photo-trends.{env}.photos-editorial-metadata-request-log`"
+        )
 
     else:
         raise ValueError(
