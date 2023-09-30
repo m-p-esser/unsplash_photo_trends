@@ -68,7 +68,7 @@ deploy-ingest-photos-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 		--timezone 'Europe/Berlin' \
 		--apply
 
-.PHONY: deploy-ingest-photos-gcs
+.PHONY: deploy-ingest-photos-napi-gcs
 deploy-ingest-photos-napi-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 	make env-init
 	make push-prefect-runner-image
@@ -79,7 +79,7 @@ deploy-ingest-photos-napi-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud R
 		--output deployments/ingest-topics-napi-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "zen_rows_api_key_block_name": "unsplash-photo-trends-zenrows-api-key", "per_page": 30 }' \
-		--cron "*/15 * * * *" \
+		--cron "*/12 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
 
