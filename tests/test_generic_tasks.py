@@ -6,17 +6,32 @@ import requests
 from google.cloud import storage
 from prefect_gcp import GcpCredentials
 
-from prefect.blocks.system import Secret
 from prefect.logging import disable_run_logger
 from src.prefect.generic_tasks import (
     count_number_stored_files_in_gcs_bucket,
+    create_random_ua_string,
     get_processing_progress_from_response_header,
     parse_response,
+    prepare_proxy_adresses,
     request_unsplash,
     request_unsplash_napi,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
+
+
+def test_create_random_ua_string_successful():
+    with disable_run_logger():
+        random_ua_string = create_random_ua_string.fn()
+        assert "Mozilla/5.0" in random_ua_string
+        assert len(random_ua_string) > 0
+
+
+def test_prepare_bright_data_proxies_successful():
+    with disable_run_logger():
+        proxies = prepare_proxy_adresses.fn(method="bright-data")
+        assert len(proxies["http"]) > 0
+        assert len(proxies["https"]) > 0
 
 
 def test_request_unsplash_successful():
@@ -27,9 +42,11 @@ def test_request_unsplash_successful():
 
 def test_request_unsplash_napi_successful():
     with disable_run_logger():
-        zenrows_api_key = Secret.load("unsplash-photo-trends-zenrows-api-key").get()
+        proxies = prepare_proxy_adresses.fn(method="bright-data")
         response = request_unsplash_napi.fn(
-            endpoint="/photos", zenrows_api_key=zenrows_api_key
+            endpoint="/photos",
+            proxies=proxies,
+            params={"per_page": 30, "order_by": "oldest", "page": 1},
         )
         assert response.status_code == 200
 
