@@ -3,16 +3,94 @@
 import datetime
 import json
 import math
+import random
 from tempfile import NamedTemporaryFile
+from typing import Literal
 
 import pandas as pd
 import requests
+from fake_useragent import UserAgent
 from google.cloud import storage
 
 from prefect import get_run_logger, task
 from prefect.blocks.system import Secret
 from src.etl.load import upload_blob_from_file
 from src.utils import timer
+
+
+@task
+def prepare_proxy_adresses(method=Literal["bright-data", "zenrows"]) -> dict:
+    """Prepare proxy adress to it can be used in a request"""
+    acceptable_methods = ["bright-data", "zenrows"]
+    if method not in acceptable_methods:
+        raise ValueError(
+            f"{method} is not an acceptable method. Allowed methods are: {acceptable_methods}"
+        )
+
+    if method == "zenrows":
+        zenrows_api_key = Secret.load("unsplash-photo-trends-zenrows-api-key").get()
+        proxy_url = f"http://{zenrows_api_key}:@proxy.zenrows.com:8001"
+
+    if method == "bright-data":
+        host = "brd.superproxy.io"
+        port = 22225
+        username = Secret.load(
+            "unsplash-photo-trends-bright-data-residential-proxy-username"
+        ).get()
+        password = Secret.load(
+            "unsplash-photo-trends-bright-data-residential-proxy-password"
+        ).get()
+        session_id = random.random()
+        proxy_url = f"http://{username}-session-{session_id}:{password}@{host}:{port}"
+
+    proxies = {"http": proxy_url, "https": proxy_url}
+
+    return proxies
+
+
+@task
+def create_random_ua_string(
+    browsers=["chrome", "firefox", "safari"], min_percentage=1.5
+) -> str:
+    """Creata a random Useragent string"""
+    ua = UserAgent(browsers=browsers, min_percentage=min_percentage)
+    random_useragent_string = ua.random
+
+    return random_useragent_string
+
+
+@task
+def inspect_request(proxies: dict, headers: dict):
+    """Request "http://httpbin.org/anything" to get information about machine requesting"""
+    response = requests.get(
+        "http://httpbin.org/anything",
+        proxies=proxies,
+        verify=False,
+        headers=headers,
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+
+@task
+def check_zenrows_credits(zenrows_api_key: str) -> dict:
+    """Check Zenrow Credits available"""
+    response = requests.get(
+        f"https://api.zenrows.com/v1/usage?apikey={zenrows_api_key}"
+    )
+
+    response.raise_for_status()
+
+    credit_limit = int(response.json()["api_credit_limit"])
+    credits_remaining = int(response.json()["api_credit_usage"])
+    consumed_quota = (credits_remaining - credit_limit) / credit_limit
+
+    return {
+        "credit_limit": credit_limit,
+        "credits_remaining": credits_remaining,
+        "consumed_quote": consumed_quota,
+    }
 
 
 @task(retries=3, retry_delay_seconds=10)
@@ -53,41 +131,21 @@ def request_unsplash(
 @task(retries=3, retry_delay_seconds=10)
 @timer
 def request_unsplash_napi(
-    endpoint: str, params: dict = {"per_page": 30}, zenrows_api_key: str = None
+    endpoint: str,
+    proxies: dict = None,
+    headers: dict = None,
+    params: dict = {"per_page": 30},
 ) -> requests.Response:
     """Request data from Unsplash API (napi, Backend API)"""
     logger = get_run_logger()
 
-    # Check Credits
-    response = requests.get(
-        f"https://api.zenrows.com/v1/usage?apikey={zenrows_api_key}"
-    )
-
-    response.raise_for_status()
-
-    credit_limit = int(response.json()["api_credit_limit"])
-    credits_remaining = int(response.json()["api_credit_usage"])
-    consumed_quota = (credits_remaining - credit_limit) / credit_limit
-
-    if consumed_quota > 0.8:
-        logger.warning(
-            f"Credit limit almost reached: {consumed_quota*100} % of Quota consumed"
-        )
-        logger.warning(f"Remaining credits: {credits_remaining}")
-
-    if credits_remaining == 0:
-        logger.error(
-            f"Credit limit reached: {consumed_quota*100} % of Quota consumed. Wait to continue"
-        )
-
-    # Data Collection
     BASE_URL = "https://unsplash.com/napi"
     URI = BASE_URL + endpoint
-    proxy = f"http://{zenrows_api_key}:@proxy.zenrows.com:8001"
-    proxies = {"http": proxy, "https": proxy}
 
-    logger.info(f"Requesting endpoint: {URI}")
-    response = requests.get(url=URI, params=params, proxies=proxies, verify=False)
+    logger.info(f"Requesting URI: {URI}")
+    response = requests.get(
+        url=URI, params=params, proxies=proxies, verify=False, headers=headers
+    )
 
     response.raise_for_status()
 
