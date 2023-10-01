@@ -17,7 +17,6 @@ from prefect.tasks import task_input_hash
 from src.etl.load import upload_blob_from_memory
 from src.prefect.generic_tasks import (
     create_random_ua_string,
-    inspect_request,
     parse_response,
     prepare_proxy_adresses,
     request_unsplash,
@@ -254,13 +253,6 @@ def ingest_photos_napi_gcs(
         useragent_string = create_random_ua_string()
         logger.info(f"Will be using '{useragent_string}' to make next requests")
         headers = {"User-Agent": useragent_string}  # Overwrite Useragent
-
-        # Inspect Request
-        request_info = inspect_request(proxies, headers)
-        logger.info(
-            f"Requested '{request_info['url']}' to check if IP is rotating and proxy is working"
-        )
-        logger.info(f"Request info: \n {pformat(request_info)}")
 
         # Actually request the data
         logger.info("Request data of interest")
