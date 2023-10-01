@@ -12,12 +12,14 @@ from prefect_gcp.bigquery import bigquery_query
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger, task
-from prefect.blocks.system import Secret
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.tasks import task_input_hash
 from src.etl.load import upload_blob_from_memory
 from src.prefect.generic_tasks import (
+    create_random_ua_string,
+    inspect_request,
     parse_response,
+    prepare_proxy_adresses,
     request_unsplash,
     request_unsplash_napi,
 )
@@ -34,17 +36,6 @@ def request_first_page(
     logger.info(f"Requesting page number 1 of https://api.unsplash.com/photos endpoint")
 
     response = request_unsplash("/photos", params)
-
-    return response
-
-
-@flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
-@timer
-def request_photos_napi(params: dict, zenrows_api_key: str):
-    """Request topics (= photography genres which have a seperate content site on unsplash) from Unsplash API"""
-
-    endpoint = "/photos"
-    response = request_unsplash_napi(endpoint, params, zenrows_api_key)
 
     return response
 
@@ -68,9 +59,9 @@ def _upload_photo_metadata_as_blob(
     photo = {
         "payload": photo_metadata,
         "request_metadata": {
-            "requested_at": response.headers["Zr-Date"],
+            "requested_at": response.headers["Date"],
             "request_id": response.headers["X-Request-Id"],
-            "request_url": response.headers["Zr-Final-Url"],
+            "request_url": response.request.url,
         },
     }
 
@@ -211,7 +202,6 @@ def write_request_log_to_bigquery(
 @timer
 def ingest_photos_napi_gcs(
     gcp_credential_block_name: str,
-    zen_rows_api_key_block_name: str,
     per_page: int,
 ):
     """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
@@ -225,7 +215,6 @@ def ingest_photos_napi_gcs(
 
     # Init all secrets and credentials
     gcp_credentials = GcpCredentials.load(gcp_credential_block_name)
-    zen_rows_api_key = Secret.load(zen_rows_api_key_block_name).get()
 
     # Request first page
     first_page_response = request_first_page()
@@ -260,8 +249,25 @@ def ingest_photos_napi_gcs(
         logger.info(f"Sleeping for {sleep_time_seconds} seconds")
         time.sleep(randint(1, 3))
 
-        response = request_photos_napi(params, zen_rows_api_key)
-        logger.info(f"Response headers: \n {response.headers}")
+        # Prepare Proxy and Useragent
+        proxies = prepare_proxy_adresses("bright-data")
+        useragent_string = create_random_ua_string()
+        logger.info(f"Will be using '{useragent_string}' to make next requests")
+        headers = {"User-Agent": useragent_string}  # Overwrite Useragent
+
+        # Inspect Request
+        request_info = inspect_request(proxies, headers)
+        logger.info(
+            f"Requested '{request_info['url']}' to check if IP is rotating and proxy is working"
+        )
+        logger.info(f"Request info: \n {pformat(request_info)}")
+
+        # Actually request the data
+        logger.info("Request data of interest")
+        response = request_unsplash_napi("/photos", proxies, headers, params)
+        logger.info(f"Request headers: \n {pformat(dict(response.request.headers))}")
+        logger.info(f"Response headers: \n {pformat(dict(response.headers))}")
+
         response_json = parse_response(response)
 
         # Asychronously collect data
@@ -278,7 +284,7 @@ def ingest_photos_napi_gcs(
         )
 
         request_id = response.headers["X-Request-Id"]
-        request_url = response.headers["Zr-Final-Url"]
+        request_url = response.request.url
         write_request_log_to_bigquery(
             gcp_credentials, request_id, request_url, params, env
         )
@@ -296,6 +302,5 @@ def ingest_photos_napi_gcs(
 if __name__ == "__main__":
     ingest_photos_napi_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
-        zen_rows_api_key_block_name="unsplash-photo-trends-zenrows-api-key",
         per_page=30,
     )
