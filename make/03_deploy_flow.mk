@@ -23,7 +23,7 @@ deploy-ingest-topics-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--cron "0 9 * * *" \
 		--timezone 'Europe/Berlin' \
-		--apply
+		--applyö
 
 .PHONY: deploy-healthcheck
 deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
@@ -40,28 +40,28 @@ deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
 		--apply
 
 .PHONY: deploy-ingest-monthly-platform-stats-gcs
-deploy-ingest-monthly-platform-stats-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
+deploy-ingest-monthly-platform-stats-gcs: ## Deploy Monthly Platform Stats GCS Flow as Google Cloud Run
 	make env-init
 	make push-prefect-runner-image
 	prefect deployment build src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs \
 		--name ingest-monthly-platform-stats-gcs-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-topics-gcs-${ENV}-deployment.yaml \
+		--output deployments/ingest-monthly-platform-stats-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--cron "0 8 * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
 
 .PHONY: deploy-ingest-photos-gcs
-deploy-ingest-photos-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
+deploy-ingest-photos-gcs: ## Deploy Ingest Photos GCS Flow as Google Cloud Run
 	make env-init
 	make push-prefect-runner-image
 	prefect deployment build src/prefect/ingest_photos_gcs.py:ingest_photos_gcs \
 		--name ingest-photos-gcs-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-topics-gcs-${ENV}-deployment.yaml \
+		--output deployments/ingest-photos-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa"}' \
 		--cron "*/15 * * * *" \
@@ -69,19 +69,35 @@ deploy-ingest-photos-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 		--apply
 
 .PHONY: deploy-ingest-photos-napi-gcs
-deploy-ingest-photos-napi-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
+deploy-ingest-photos-napi-gcs: ## Deploy Ingest Photos NAPI GCS Flow as Google Cloud Run
 	make env-init
 	make push-prefect-runner-image
 	prefect deployment build src/prefect/ingest_photos_napi_gcs.py:ingest_photos_napi_gcs \
 		--name ingest-photos-napi-gcs-${ENV} \
 		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-topics-napi-gcs-${ENV}-deployment.yaml \
+		--output deployments/ingest-photos-napi-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "per_page": 30 }' \
 		--cron "*/10 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
+
+.PHONY: deploy-ingest-photos-expanded-napi-gcs
+deploy-ingest-photos-expanded-napi-gcs: ## Deploy Ingest Photos expanded NAPI GCS Flow as Google Cloud Run
+	make env-init
+	make push-prefect-runner-image
+	prefect deployment build src/prefect/ingest_photos_expanded_napi_gcs.py:ingest_photos_expanded_napi_gcs \
+		--name ingest-photos-expanded-napi-gcs-${ENV} \
+		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
+		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
+		--output deployments/ingest-photos-expanded-napi-gcs-${ENV}-deployment.yaml \
+		--pool ${ENV}-cloud-run-push-work-pool \
+		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "batch_size": 30, "total_record_size": 300 }' \
+		--timezone 'Europe/Berlin' \
+		--apply
+# --cron "*/10 * * * *" \
+
 
 .PHONY: deploy-sync-topics-gcs-to-bigquery
 deploy-sync-gcs-to-bigquery: ## Sync Google Cloud Storage and Bigquery

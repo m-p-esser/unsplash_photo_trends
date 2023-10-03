@@ -27,6 +27,11 @@ integration-test-ingest-photos-gcs: ## Integration Test Ingest Photos GCS Flow
 	prefect deployment run ingest-photos-gcs/ingest-photos-gcs-${ENV}
 
 .PHONY: integration-test-ingest-photos-napi-gcs
-integration-test-ingest-photos-napi-gcs: ## Integration Test Ingest Photos GCS Flow (using Backend API)
+integration-test-ingest-photos-napi-gcs: ## Integration Test Ingest Photos NAPI GCS Flow (using Backend API)
 	make deploy-ingest-photos-napi-gcs
 	prefect deployment run ingest-photos-napi-gcs/ingest-photos-napi-gcs-${ENV}
+
+.PHONY: integration-test-ingest-photos-expanded-napi-gcs
+integration-test-ingest-photos-expanded-napi-gcs: ## Integration Test Ingest Photos Expanded NAPI GCS Flow (using Backend API)
+	make deploy-ingest-photos-expanded-napi-gcs
+	prefect deployment run ingest-photos-expanded-napi-gcs/ingest-photos-expanded-napi-gcs-${ENV}
