@@ -95,7 +95,7 @@ deploy-ingest-photos-expanded-napi-gcs: ## Deploy Ingest Photos expanded NAPI GC
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "batch_size": 20, "total_record_size": 300 }' \
 		--timezone 'Europe/Berlin' \
-		--cron "*/4 * * * *" \
+		--cron "*/10 * * * *" \
 		--apply
 
 
