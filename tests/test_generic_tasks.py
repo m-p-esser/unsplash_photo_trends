@@ -51,6 +51,16 @@ def test_request_unsplash_napi_successful():
         assert response.status_code == 200
 
 
+# def test_request_unsplash_napi_async_successful():
+#     with disable_run_logger():
+#         proxies = prepare_proxy_adresses.fn(method="bright-data")
+#         response = request_unsplash_napi_async.fn(
+#             endpoint="/photos/3jUTmrmdNVg",
+#             proxies=proxies,
+#         )
+#         assert response.status_code == 200
+
+
 def test_parse_response_successful():
     with disable_run_logger():
         # Create an instance of the Response object
