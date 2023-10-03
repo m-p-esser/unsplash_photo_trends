@@ -4,9 +4,12 @@ import datetime
 import json
 import math
 import random
+import time
+from pprint import pformat
 from tempfile import NamedTemporaryFile
 from typing import Literal
 
+import httpx
 import pandas as pd
 import requests
 from fake_useragent import UserAgent
@@ -150,6 +153,31 @@ def request_unsplash_napi(
     response.raise_for_status()
 
     return response
+
+
+@task
+async def request_unsplash_napi_async(
+    endpoint: str, proxies: dict = None, headers: dict = None, params: dict = None
+):
+    logger = get_run_logger()
+
+    async with httpx.AsyncClient(proxies=proxies, verify=False) as client:
+        BASE_URL = "https://unsplash.com/napi"
+        URI = BASE_URL + endpoint
+
+        sleep_seconds = random.randint(1, 3)
+        logger.info(f"Sleeping for {sleep_seconds} seconds...")
+        time.sleep(sleep_seconds)
+
+        logger.info(f"Requesting URI: {URI}")
+        response = await client.get(url=URI, params=params, headers=headers)
+
+        logger.info(f"Request headers: \n {pformat(dict(response.request.headers))}")
+        logger.info(f"Response headers: \n {pformat(dict(response.headers))}")
+
+        response.raise_for_status()
+
+        return response
 
 
 @task(retries=3, retry_delay_seconds=10)
