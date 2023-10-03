@@ -165,9 +165,10 @@ def ingest_photos_expanded_napi_gcs(
             f"All ({total_record_size}) metadata (and log) records written to Bigquery"
         )
 
+    total_records_written = 0
+
     while len(remaining_photo_ids) > 0 and total_records_written < total_record_size:
         # Request and write data
-        total_records_written = 0
 
         for batch in batches:
             useragent_string = create_random_ua_string()
