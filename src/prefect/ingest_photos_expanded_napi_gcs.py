@@ -159,13 +159,13 @@ def ingest_photos_expanded_napi_gcs(
         for i in range(0, len(remaining_photo_ids), batch_size)
     ]
 
-    if remaining_photo_ids == 0:
+    if len(remaining_photo_ids) == 0:
         logger.info(f"Job finished")
         logger.info(
             f"All ({total_record_size}) metadata (and log) records written to Bigquery"
         )
 
-    while remaining_photo_ids > 0 and total_records_written < total_record_size:
+    while len(remaining_photo_ids) > 0 and total_records_written < total_record_size:
         # Request and write data
         total_records_written = 0
 
