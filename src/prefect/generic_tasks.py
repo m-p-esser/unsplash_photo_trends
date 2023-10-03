@@ -1,10 +1,10 @@
 """ Collection of generic tasks that can be reused across flows """
 
+import asyncio
 import datetime
 import json
 import math
 import random
-import time
 from pprint import pformat
 from tempfile import NamedTemporaryFile
 from typing import Literal
@@ -173,7 +173,7 @@ async def request_unsplash_napi_async(
 
         sleep_seconds = random.randint(1, 3)
         logger.info(f"Sleeping for {sleep_seconds} seconds...")
-        time.sleep(sleep_seconds)
+        await asyncio.sleep(sleep_seconds)
 
         logger.info(f"Requesting URI: {URI}")
         response = await client.get(url=URI, params=params, headers=headers)
