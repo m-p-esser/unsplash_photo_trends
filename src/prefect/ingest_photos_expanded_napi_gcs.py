@@ -43,7 +43,7 @@ def get_requested_photos_from_logs(
     return results
 
 
-@flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
+@flow(retries=3, retry_delay_seconds=10, timeout_seconds=120)  # Subflow (2nd level)
 async def request_unsplash_napi(
     batch: list[str], proxies: dict = None, headers: dict = None, params: dict = None
 ):
