@@ -17,6 +17,7 @@ from google.cloud import storage
 
 from prefect import get_run_logger, task
 from prefect.blocks.system import Secret
+from prefect.tasks import task_input_hash
 from src.etl.load import upload_blob_from_file
 from src.utils import timer
 
@@ -155,7 +156,12 @@ def request_unsplash_napi(
     return response
 
 
-@task
+@task(
+    retries=3,
+    retry_delay_seconds=3,
+    cache_key_fn=task_input_hash,
+    cache_expiration=datetime.timedelta(hours=1),
+)
 async def request_unsplash_napi_async(
     endpoint: str, proxies: dict = None, headers: dict = None, params: dict = None
 ):
