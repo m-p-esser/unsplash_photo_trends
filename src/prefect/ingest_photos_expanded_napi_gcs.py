@@ -77,7 +77,7 @@ def write_photo_metadata_expanded_to_bigquery(
     )
 
     logger.info(
-        f"Wrote {len(results)} rows to table 'unsplash-photo-trends.{env}.photos-editorial-metadata-expanded'"
+        f"Wrote {len(records)} rows to table 'unsplash-photo-trends.{env}.photos-editorial-metadata-expanded'"
     )
 
     return results
@@ -152,10 +152,6 @@ def ingest_photos_expanded_napi_gcs(
     proxies.pop("http")
     proxies.pop("https")
 
-    useragent_string = create_random_ua_string()
-    logger.info(f"Will be using '{useragent_string}' to make next requests")
-    headers = {"User-Agent": useragent_string}  # Overwrite Useragent
-
     # Split request load in batches
     remaining_photo_ids = remaining_photo_ids[0:total_record_size]
     batches = [
@@ -163,18 +159,21 @@ def ingest_photos_expanded_napi_gcs(
         for i in range(0, len(remaining_photo_ids), batch_size)
     ]
 
-    while True:
-        if remaining_photo_ids == 0:
-            logger.info(f"Job finished")
-            logger.info(
-                f"All ({total_record_size}) metadata (and log) records written to Bigquery"
-            )
-            break
+    if remaining_photo_ids == 0:
+        logger.info(f"Job finished")
+        logger.info(
+            f"All ({total_record_size}) metadata (and log) records written to Bigquery"
+        )
 
+    while remaining_photo_ids > 0 and total_records_written < total_record_size:
         # Request and write data
         total_records_written = 0
 
         for batch in batches:
+            useragent_string = create_random_ua_string()
+            logger.info(f"Will be using '{useragent_string}' to make next requests")
+            headers = {"User-Agent": useragent_string}  # Overwrite Useragent
+
             responses = request_unsplash_napi(batch, proxies, headers)
 
             # Write photo metadata records to Bigquery
@@ -224,7 +223,12 @@ def ingest_photos_expanded_napi_gcs(
             write_request_log_to_bigquery(gcp_credentials, request_log_records, env)
 
             total_records_written += batch_size
-            logger.info(f"{batch_size} metadata (and log) records written to Bigquery")
+            logger.info(
+                f"Batch processed: {batch_size} metadata (and log) records written to Bigquery"
+            )
+            logger.info(
+                f"In this run: {total_records_written} metadata (and log) records written to Bigquery"
+            )
 
             if total_records_written == 300:
                 logger.info(f"Job finished")
