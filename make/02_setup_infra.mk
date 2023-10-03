@@ -14,6 +14,9 @@ create-gcs-buckets: ### Create Google Cloud Storage Buckets
 	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://photos-editorial-metadata-test || true
 	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://photos-editorial-metadata-prod || true
 	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://bucket-with-one-file|| true
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://photos-editorial-metadata-expanded-dev || true
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://photos-editorial-metadata-expanded-test || true
+	gsutil mb -c standard -l ${GCP_DEFAULT_REGION} gs://photos-editorial-metadata-expanded-prod || true
 	
 
 .PHONY: cleanup-gcs-buckets
