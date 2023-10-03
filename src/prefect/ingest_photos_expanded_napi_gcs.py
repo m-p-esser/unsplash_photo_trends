@@ -109,7 +109,9 @@ def write_request_log_to_bigquery(
     return results
 
 
-@flow()  # Main Flow (1st level)
+@flow(
+    retries=3, retry_delay_seconds=10, timeout_seconds=120
+)  # Main Flow (1st level) # Main Flow (1st level)
 @timer
 def ingest_photos_expanded_napi_gcs(
     gcp_credential_block_name: str, batch_size: int = 30, total_record_size: int = 300
