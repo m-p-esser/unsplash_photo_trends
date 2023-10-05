@@ -1,6 +1,5 @@
 """ Collection of generic tasks that can be reused across flows """
 
-import asyncio
 import datetime
 import json
 import math
@@ -171,9 +170,9 @@ async def request_unsplash_napi_async(
         BASE_URL = "https://unsplash.com/napi"
         URI = BASE_URL + endpoint
 
-        sleep_seconds = random.randint(1, 3)
-        logger.info(f"Sleeping for {sleep_seconds} seconds...")
-        await asyncio.sleep(sleep_seconds)
+        # sleep_seconds = random.randint(1, 3)
+        # logger.info(f"Sleeping for {sleep_seconds} seconds...")
+        # await asyncio.sleep(sleep_seconds)
 
         logger.info(f"Requesting URI: {URI}")
         response = await client.get(url=URI, params=params, headers=headers)
