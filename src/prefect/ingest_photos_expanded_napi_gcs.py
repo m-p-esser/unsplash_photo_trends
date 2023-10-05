@@ -123,24 +123,26 @@ def ingest_photos_expanded_napi_gcs(
 
     # Get all Photos
     storage_client = gcp_credentials.get_cloud_storage_client()
-    bucket = storage_client.get_bucket(source_bucket_name)
     logger.info(f"Collecting blobs from bucket '{source_bucket_name}'")
-    list(bucket.list_blobs())
+    blobs = storage_client.list_blobs(source_bucket_name, page_size=10000)
+    pages = blobs.pages
+    photo_ids = []
+    for page in pages:
+        blob_names = [str(blob.name).split(".")[0] for blob in page]
+        photo_ids.extend(blob_names)
+    logger.info(f"{len(photo_ids)} Photos stored in {source_bucket_name}")
 
-    # photo_ids = [str(blob.name).split(".")[0] for blob in blobs]
-    # logger.info(f"{len(photo_ids)} Photos stored in {source_bucket_name}")
+    # Get all previously requested photos (where expanded photo metadata is available)
+    requested_photo_ids = get_requested_photos_from_logs(gcp_credentials, env)
+    logger.info(
+        f"{len(requested_photo_ids)} Photos with expanded metadata written to 'photos-editorial-metadata-expanded-request-log'"
+    )
 
-    # # Get all previously requested photos (where expanded photo metadata is available)
-    # requested_photo_ids = get_requested_photos_from_logs(gcp_credentials, env)
-    # logger.info(
-    #     f"{len(requested_photo_ids)} Photos with expanded metadata written to 'photos-editorial-metadata-expanded-request-log'"
-    # )
-
-    # # Compare both lists and get photo id that need to be requested
-    # remaining_photo_ids = list(set(photo_ids).difference(set(requested_photo_ids)))
-    # logger.info(
-    #     f"{len(remaining_photo_ids)} Photos still need to requested from https://unsplash.com/napi/photos/<photo_id> "
-    # )
+    # Compare both lists and get photo id that need to be requested
+    remaining_photo_ids = list(set(photo_ids).difference(set(requested_photo_ids)))
+    logger.info(
+        f"{len(remaining_photo_ids)} Photos still need to requested from https://unsplash.com/napi/photos/<photo_id> "
+    )
 
     # # Prepare Proxy and Useragent
     # proxies = prepare_proxy_adresses("bright-data")
