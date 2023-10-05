@@ -177,10 +177,11 @@ async def request_unsplash_napi_async(
         logger.info(f"Requesting URI: {URI}")
         response = await client.get(url=URI, params=params, headers=headers)
 
-        logger.info(f"Request headers: \n {pformat(dict(response.request.headers))}")
-        logger.info(f"Response headers: \n {pformat(dict(response.headers))}")
-
-        response.raise_for_status()
+        await response.raise_for_status()
+        await logger.info(
+            f"Request headers: \n {pformat(dict(response.request.headers))}"
+        )
+        await logger.info(f"Response headers: \n {pformat(dict(response.headers))}")
 
         return response
 
