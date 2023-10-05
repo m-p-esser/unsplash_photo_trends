@@ -44,7 +44,7 @@ def get_requested_photos_from_logs(
     return results
 
 
-@flow(retries=3, retry_delay_seconds=10, timeout_seconds=120)  # Subflow (2nd level)
+@flow(timeout_seconds=120)  # Subflow (2nd level)
 async def request_unsplash_napi(
     batch: list[str], proxies: dict = None, headers: dict = None, params: dict = None
 ):
@@ -110,9 +110,7 @@ def write_request_log_to_bigquery(
     return results
 
 
-@flow(
-    retries=3, retry_delay_seconds=10, timeout_seconds=120
-)  # Main Flow (1st level) # Main Flow (1st level)
+@flow(timeout_seconds=120)  # Main Flow (1st level) # Main Flow (1st level)
 @timer
 def ingest_photos_expanded_napi_gcs(
     gcp_credential_block_name: str, batch_size: int = 30, total_record_size: int = 300
