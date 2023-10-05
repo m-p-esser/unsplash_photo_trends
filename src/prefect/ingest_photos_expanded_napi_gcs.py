@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime
+import faulthandler
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
@@ -246,6 +247,8 @@ def ingest_photos_expanded_napi_gcs(
 
 
 if __name__ == "__main__":
+    # @see https://github.com/PrefectHQ/prefect/pull/8983
+    faulthandler.dump_traceback_later(60)
     ingest_photos_expanded_napi_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         batch_size=30,
