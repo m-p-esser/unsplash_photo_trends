@@ -1,12 +1,19 @@
 """ Flow to request https://unsplash.com/napi/photos/<photo_id> Endpoint (Backend API)"""
 
 import asyncio
+import datetime
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger
-from src.prefect.generic_tasks import request_unsplash_napi_async
+from src.data_types import PhotoEditorialMetadataExpanded
+from src.decoder import datetime_decoder
+from src.prefect.generic_tasks import (
+    create_random_ua_string,
+    prepare_proxy_adresses,
+    request_unsplash_napi_async,
+)
 from src.utils import load_env_variables, timer
 
 
