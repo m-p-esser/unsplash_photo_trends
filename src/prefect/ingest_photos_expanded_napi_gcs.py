@@ -52,7 +52,7 @@ async def request_unsplash_napi(
         request_unsplash_napi_async(endpoint, proxies, headers, params)
         for endpoint in endpoints
     ]
-    responses = await asyncio.gather(*tasks)
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
 
     return responses
 
