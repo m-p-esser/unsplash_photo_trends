@@ -124,7 +124,7 @@ def ingest_photos_expanded_napi_gcs(
     # Get all Photos
     storage_client = gcp_credentials.get_cloud_storage_client()
     storage_client.get_bucket(source_bucket_name)
-    # blobs = list(bucket.list_blobs())
+    list(source_bucket_name.list_blobs())
     # photo_ids = [str(blob.name).split(".")[0] for blob in blobs]
     # logger.info(f"{len(photo_ids)} Photos stored in {source_bucket_name}")
 
