@@ -111,7 +111,7 @@ def ingest_photos_expanded_napi_gcs(
 ):
     """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
 
-    get_run_logger()
+    logger = get_run_logger()
 
     # Init all variables
     env_variables = load_env_variables()
@@ -123,8 +123,10 @@ def ingest_photos_expanded_napi_gcs(
 
     # Get all Photos
     storage_client = gcp_credentials.get_cloud_storage_client()
-    storage_client.get_bucket(source_bucket_name)
-    list(source_bucket_name.list_blobs())
+    bucket = storage_client.get_bucket(source_bucket_name)
+    logger.info(f"Collecting blobs from bucket '{source_bucket_name}'")
+    list(bucket.list_blobs())
+
     # photo_ids = [str(blob.name).split(".")[0] for blob in blobs]
     # logger.info(f"{len(photo_ids)} Photos stored in {source_bucket_name}")
 
