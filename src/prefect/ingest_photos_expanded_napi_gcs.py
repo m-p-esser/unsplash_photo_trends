@@ -151,7 +151,7 @@ def ingest_photos_expanded_napi_gcs(
     )
 
     # Prepare Proxy and Useragent
-    proxies = prepare_proxy_adresses("bright-data")
+    proxies = prepare_proxy_adresses("residential")
     proxies["http://"] = proxies["http"]
     proxies["https://"] = proxies["https"]
     proxies.pop("http")
