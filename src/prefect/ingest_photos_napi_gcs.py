@@ -249,7 +249,7 @@ def ingest_photos_napi_gcs(
         time.sleep(randint(1, 3))
 
         # Prepare Proxy and Useragent
-        proxies = prepare_proxy_adresses("bright-data")
+        proxies = prepare_proxy_adresses("residential")
         useragent_string = create_random_ua_string()
         logger.info(f"Will be using '{useragent_string}' to make next requests")
         headers = {"User-Agent": useragent_string}  # Overwrite Useragent
