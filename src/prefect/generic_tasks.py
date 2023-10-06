@@ -21,29 +21,40 @@ from src.utils import timer
 
 
 @task
-def prepare_proxy_adresses(method=Literal["bright-data", "zenrows"]) -> dict:
+def prepare_proxy_adresses(
+    proxy_type=Literal["residential", "datacenter"],
+) -> dict:
     """Prepare proxy adress to it can be used in a request"""
-    acceptable_methods = ["bright-data", "zenrows"]
-    if method not in acceptable_methods:
+
+    allowed_proxy_types = ["residential", "datacenter"]
+    if proxy_type not in allowed_proxy_types:
         raise ValueError(
-            f"{method} is not an acceptable method. Allowed methods are: {acceptable_methods}"
+            f"`proxy_type` '{proxy_type}' not allowed. Choose one of the following: {allowed_proxy_types}"
         )
 
-    if method == "zenrows":
-        zenrows_api_key = Secret.load("unsplash-photo-trends-zenrows-api-key").get()
-        proxy_url = f"http://{zenrows_api_key}:@proxy.zenrows.com:8001"
+    host = "brd.superproxy.io"
+    port = 22225
 
-    if method == "bright-data":
-        host = "brd.superproxy.io"
-        port = 22225
+    if proxy_type == "residential":
+        prefect_block_prefix = "unsplash-photo-trends-bright-data"
         username = Secret.load(
-            "unsplash-photo-trends-bright-data-residential-proxy-username"
+            f"{prefect_block_prefix}-residential-proxy-username"
         ).get()
         password = Secret.load(
-            "unsplash-photo-trends-bright-data-residential-proxy-password"
+            f"{prefect_block_prefix}-residential-proxy-password"
         ).get()
-        session_id = random.random()
-        proxy_url = f"http://{username}-session-{session_id}:{password}@{host}:{port}"
+
+    if proxy_type == "datacenter":
+        prefect_block_prefix = "unsplash-photo-trends-bright-data"
+        username = Secret.load(
+            f"{prefect_block_prefix}-datacenter-proxy-username"
+        ).get()
+        password = Secret.load(
+            f"{prefect_block_prefix}-datacenter-proxy-password"
+        ).get()
+
+    session_id = random.random()
+    proxy_url = f"http://{username}-session-{session_id}:{password}@{host}:{port}"
 
     proxies = {"http": proxy_url, "https": proxy_url}
 
