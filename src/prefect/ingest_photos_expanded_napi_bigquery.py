@@ -1,4 +1,5 @@
-""" Flow to request https://unsplash.com/napi/photos/<photo_id> Endpoint (Backend API)"""
+""" Flow to request https://unsplash.com/napi/photos/<photo_id> Endpoint (Backend API) 
+to receive editorial metadata and store it in Bigquery """
 
 import asyncio
 import datetime
@@ -112,10 +113,10 @@ def write_request_log_to_bigquery(
 
 @flow(timeout_seconds=120)  # Main Flow (1st level) # Main Flow (1st level)
 @timer
-def ingest_photos_expanded_napi_gcs(
+def ingest_photos_expanded_napi_bigquery(
     gcp_credential_block_name: str, batch_size: int = 30, total_record_size: int = 300
 ):
-    """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
+    """Flow to load editorial photo metadata from Unsplash and store them in Bigquery"""
 
     logger = get_run_logger()
 
@@ -247,7 +248,7 @@ def ingest_photos_expanded_napi_gcs(
 if __name__ == "__main__":
     # @see https://github.com/PrefectHQ/prefect/pull/8983
     faulthandler.dump_traceback_later(60)
-    ingest_photos_expanded_napi_gcs(
+    ingest_photos_expanded_napi_bigquery(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         batch_size=30,
         total_record_size=300,
