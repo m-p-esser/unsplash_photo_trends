@@ -29,7 +29,7 @@ def test_create_random_ua_string_successful():
 
 def test_prepare_bright_data_proxies_successful():
     with disable_run_logger():
-        proxies = prepare_proxy_adresses.fn(method="bright-data")
+        proxies = prepare_proxy_adresses.fn(proxy_type="residential")
         assert len(proxies["http"]) > 0
         assert len(proxies["https"]) > 0
 
@@ -42,7 +42,7 @@ def test_request_unsplash_successful():
 
 def test_request_unsplash_napi_successful():
     with disable_run_logger():
-        proxies = prepare_proxy_adresses.fn(method="bright-data")
+        proxies = prepare_proxy_adresses.fn(proxy_type="residential")
         response = request_unsplash_napi.fn(
             endpoint="/photos",
             proxies=proxies,
@@ -51,14 +51,14 @@ def test_request_unsplash_napi_successful():
         assert response.status_code == 200
 
 
-# def test_request_unsplash_napi_async_successful():
+# async def test_request_unsplash_napi_async_successful():
 #     with disable_run_logger():
-#         proxies = prepare_proxy_adresses.fn(method="bright-data")
-#         response = request_unsplash_napi_async.fn(
+#         proxies = prepare_proxy_adresses.fn(proxy_type="residential")
+#         response = await request_unsplash_napi_async.fn(
 #             endpoint="/photos/3jUTmrmdNVg",
 #             proxies=proxies,
 #         )
-#         assert response.status_code == 200
+#  assert response.status_code == 200
 
 
 def test_parse_response_successful():
