@@ -1,13 +1,21 @@
 """ Ingest actual photos (not metadata) to GCS using Download Links from Bigquery """
 
+import asyncio
 import datetime
 import faulthandler
+from typing import Literal
 
+import httpx
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger
-from src.prefect.generic_tasks import create_random_ua_string, prepare_proxy_adresses
+from src.prefect.generic_tasks import (
+    create_random_ua_string,
+    prepare_proxy_adresses,
+    request_unsplash_napi_async,
+    upload_file_to_gcs_async,
+)
 from src.utils import load_env_variables
 
 
@@ -17,18 +25,19 @@ from src.utils import load_env_variables
 )  # Subflow (2nd level)
 def get_downloadable_photos_from_logs(
     gcp_credentials: GcpCredentials, env: str = "dev", location="europe-west3"
-) -> int:
+) -> list[tuple]:
     """Get all photos which have can be requested and downloaded"""
 
     logger = get_run_logger()
 
     query = f"""
-            SELECT photo_id
-            FROM `unsplash-photo-trends.{env}.photos-editorial-metadata-expanded-request-log`
-        """
+            SELECT photo_id, urls.full, created_at
+            FROM `unsplash-photo-trends.{env}.photos-editorial-metadata-expanded`
+            ORDER BY requested_at asc
+            """
 
     results = bigquery_query(query, gcp_credentials, location=location)
-    results = [result[0] for result in results]
+    results = [(result[0], result[1], result[2]) for result in results]
 
     logger.info(f"There are {len(results)} photos available for download")
 
@@ -49,7 +58,7 @@ def get_downloaded_photos_from_logs(
     query = f"""
             SELECT photo_id
             FROM `unsplash-photo-trends.{env}.photos-editorial-download-log`
-        """
+            """
 
     results = bigquery_query(query, gcp_credentials, location=location)
     results = [result[0] for result in results]
@@ -61,17 +70,55 @@ def get_downloaded_photos_from_logs(
 
 @flow(timeout_seconds=120)  # Subflow (2nd level)
 async def request_unsplash_napi(
-    batch: list[str], proxies: dict = None, headers: dict = None, params: dict = None
+    batch: list[tuple[str, str, datetime.datetime]],
+    proxies: dict = None,
+    headers: dict = None,
+    params: dict = None,
+    base_url: str = "https://images.unsplash.com",
 ):
-    pass
-    # endpoints = [f"/photos/{photo_id}" for photo_id in batch]
-    # tasks = [
-    #     request_unsplash_napi_async(endpoint, proxies, headers, params)
-    #     for endpoint in endpoints
-    # ]
-    # responses = await asyncio.gather(*tasks, return_exceptions=True)
+    """Asynchronously request images from Unsplash"""
+    tasks = [
+        request_unsplash_napi_async(
+            endpoint=photo[1].replace(base_url, ""),  # download path
+            proxies=proxies,
+            headers=headers,
+            params=params,
+            base_url=base_url,
+            photo_id=photo[0],
+            created_at=photo[
+                2
+            ],  # created at -> when has the photo been uploaded to unsplash
+        )
+        for photo in batch
+    ]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    # return responses
+    return results
+
+
+@flow(timeout_seconds=120)  # Subflow (2nd level)
+async def upload_files_to_gcs(
+    results: list[dict],
+    gcp_credential_block_name: str,
+    bucket_name: str,
+    file_extension: str,
+):
+    """Asynchonously upload photos to GCS"""
+    logger = get_run_logger()
+
+    logger.info("Starting to upload photos to GCS")
+
+    for result in results:
+        upload_file_to_gcs_async.submit(
+            gcp_credential_block_name,
+            bucket_name,
+            result["response"],
+            result["photo_id"],
+            file_extension,
+            f"{result['created_at'].year}-{result['created_at'].month}",
+        )
+
+    logger.info("Finished uploading photos to GCS")
 
 
 @flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
@@ -102,7 +149,10 @@ def write_download_log_to_bigquery(
 
 @flow
 def ingest_photos_gcs(
-    gcp_credential_block_name: str, batch_size: int = 30, total_record_size: int = 300
+    gcp_credential_block_name: str,
+    proxy_type: Literal["datacenter", "residential"],
+    batch_size: int = 20,
+    total_record_size: int = 100,
 ):
     """Flow to download photos from unsplash and store them in GCS"""
 
@@ -111,111 +161,89 @@ def ingest_photos_gcs(
     # Init all variables
     env_variables = load_env_variables()
     env = env_variables["ENV"]  # dev, test or prod
-    f"photos-editorial-{env}"
 
     # Init all credentials
     gcp_credentials = GcpCredentials.load(gcp_credential_block_name)
 
     # Get all downloadable photos (Bigquery)
-    downloadable_photo_ids = get_downloadable_photos_from_logs(gcp_credentials, env)
+    downloadable_photos = get_downloadable_photos_from_logs(gcp_credentials, env)
 
     # Get already downloaded photos (Bigquery)
-    get_downloaded_photos_from_logs(gcp_credentials, env)
+    downloaded_photos = get_downloaded_photos_from_logs(gcp_credentials, env)
 
-    # Prepare Proxy and Useragent
-    proxies = prepare_proxy_adresses("datacenter")
-    proxies["http://"] = proxies["http"]
-    proxies["https://"] = proxies["https"]
-    proxies.pop("http")
-    proxies.pop("https")
-
-    # Split request load in batches
-    remaining_photo_ids = downloadable_photo_ids[0:total_record_size]
-    batches = [
-        remaining_photo_ids[i : i + batch_size]
-        for i in range(0, len(remaining_photo_ids), batch_size)
-    ]
+    # Compare both
+    downloadable_photo_ids = [p[0] for p in downloadable_photos]
+    remaining_photo_ids = set(downloadable_photo_ids).difference(set(downloaded_photos))
 
     if len(remaining_photo_ids) == 0:
         logger.info(f"Job finished")
         logger.info(f"All ({total_record_size}) photos downloaded")
 
-    total_records_written = 0
+    # Split request load in batches
+    remaining_photos = [p for p in downloadable_photos if p[0] in remaining_photo_ids][
+        0:total_record_size
+    ]
+    batches = [
+        remaining_photos[i : i + batch_size]
+        for i in range(0, len(remaining_photo_ids), batch_size)
+    ]
 
-    while len(remaining_photo_ids) > 0 and total_records_written < total_record_size:
+    total_records_iterated = 0
+
+    while len(remaining_photos) > 0 and total_records_iterated < total_record_size:
         # Request and write data
 
         for batch in batches:
+            # Prepare Proxy and Useragent
+            proxies = prepare_proxy_adresses(proxy_type)
+            proxies["http://"] = proxies["http"]
+            proxies["https://"] = proxies["https"]
+            proxies.pop("http")
+            proxies.pop("https")
+
             useragent_string = create_random_ua_string()
             logger.info(f"Will be using '{useragent_string}' to make next requests")
             headers = {"User-Agent": useragent_string}  # Overwrite Useragent
 
-            # Request and download (to tempfile)
-            responses = request_unsplash_napi(batch, proxies, headers)
+            # Async - Request photos
+            results = request_unsplash_napi(batch, proxies, headers)
 
-            # Compress photo (optional)
-            # Upload photos to Blob Storage (using Photo ID as name)
-
-            ###### REPLACE WITH ASYNC BlOB UPLOADS ###########
-            # # Write photo metadata records to Bigquery
-            # records_photo_metadata = []
-
-            # for response in responses:
-            #     response_json = response.json(object_hook=datetime_decoder)
-            #     response_json["requested_at"] = datetime.datetime.now().strftime(
-            #         "%Y-%m-%d %H:%M:%S"
-            #     )
-
-            #     # This class initialization makes sure to filter the response by only keeping relevant keys
-            #     photo_editorial_metadata_expanded = (
-            #         PhotoEditorialMetadataExpanded.from_dict(response_json)
-            #     )
-
-            #     # Convert back to dict so it can be written to Bigquery
-            #     record_photo_metadata = photo_editorial_metadata_expanded.to_dict()
-            #     record_photo_metadata["photo_id"] = record_photo_metadata["id"]
-            #     record_photo_metadata.pop("id", None)
-            #     records_photo_metadata.append(record_photo_metadata)
-
-            # write_download_log_to_bigquery(
-            #     gcp_credentials, records_photo_metadata, env
-            # )
+            # Async - Upload photos to Blob Storage (using Photo ID as name)
+            bucket_name = f"photos-editorial-{env}"
+            upload_files_to_gcs(results, gcp_credential_block_name, bucket_name, "jpg")
 
             # Log written records to Bigquery
             download_log_records = []
 
-            for response in responses:
-                response_json = response.json()
-                request_url = str(response.request.url)
-                request_id = response.headers["x-request-id"]
-                photo_id = response_json["id"]
+            for result in results:
+                if isinstance(result["response"], httpx.Response):
+                    response = result["response"]
+                    request_url = str(response.request.url)
+                    request_id = response.headers["x-imgix-id"]
+                    photo_id = result["photo_id"]
 
-                download_log_record = {
-                    "request_id": request_id,
-                    "request_url": request_url,
-                    "photo_id": photo_id,
-                    "requested_at": datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                }
+                    download_log_record = {
+                        "request_id": request_id,
+                        "request_url": request_url,
+                        "photo_id": photo_id,
+                        "requested_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                    }
 
-                download_log_records.append(download_log_record)
+                    download_log_records.append(download_log_record)
 
             write_download_log_to_bigquery(gcp_credentials, download_log_records, env)
 
-            total_records_written += batch_size
+            total_records_iterated += batch_size
             logger.info(
-                f"Batch processed: {batch_size} metadata (and log) records written to Bigquery"
+                f"Batch processed: {len(download_log_records)} of {batch_size} blobs uploaded to GCS"
             )
-            logger.info(
-                f"In this run: {total_records_written} metadata (and log) records written to Bigquery"
-            )
+            logger.info(f"In this run: {total_records_iterated} blobs uploaded to GCS")
 
-            if total_records_written == 300:
+            if total_records_iterated == total_record_size:
                 logger.info(f"Job finished")
-                logger.info(
-                    f"All ({total_record_size}) metadata (and log) records written to Bigquery"
-                )
+                logger.info(f"All ({total_record_size}) records written to Bigquery")
                 break
 
 
@@ -224,7 +252,7 @@ if __name__ == "__main__":
     faulthandler.dump_traceback_later(60)
     ingest_photos_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
-        batch_size=30,
-        total_record_size=300,
         proxy_type="datacenter",
+        batch_size=10,
+        total_record_size=10,
     )
