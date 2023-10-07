@@ -6,6 +6,7 @@ import time
 from datetime import timedelta
 from pprint import pformat
 from random import randint
+from typing import Literal
 
 from google.cloud import storage
 from prefect_gcp.bigquery import bigquery_query
@@ -202,6 +203,7 @@ def write_request_log_to_bigquery(
 def ingest_photos_napi_gcs(
     gcp_credential_block_name: str,
     per_page: int,
+    proxy_type: Literal["datacenter", "residential"],
 ):
     """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
 
@@ -249,7 +251,7 @@ def ingest_photos_napi_gcs(
         time.sleep(randint(1, 3))
 
         # Prepare Proxy and Useragent
-        proxies = prepare_proxy_adresses("residential")
+        proxies = prepare_proxy_adresses(proxy_type)
         useragent_string = create_random_ua_string()
         logger.info(f"Will be using '{useragent_string}' to make next requests")
         headers = {"User-Agent": useragent_string}  # Overwrite Useragent
@@ -295,4 +297,5 @@ if __name__ == "__main__":
     ingest_photos_napi_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         per_page=30,
+        proxy_type="datacenter",
     )

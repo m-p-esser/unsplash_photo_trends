@@ -4,6 +4,7 @@ to receive editorial metadata and store it in Bigquery """
 import asyncio
 import datetime
 import faulthandler
+from typing import Literal
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
@@ -114,7 +115,10 @@ def write_request_log_to_bigquery(
 @flow(timeout_seconds=120)  # Main Flow (1st level) # Main Flow (1st level)
 @timer
 def ingest_photos_expanded_napi_bigquery(
-    gcp_credential_block_name: str, batch_size: int = 30, total_record_size: int = 300
+    gcp_credential_block_name: str,
+    proxy_type: Literal["datacenter", "residential"],
+    batch_size: int = 30,
+    total_record_size: int = 300,
 ):
     """Flow to load editorial photo metadata from Unsplash and store them in Bigquery"""
 
@@ -152,7 +156,7 @@ def ingest_photos_expanded_napi_bigquery(
     )
 
     # Prepare Proxy and Useragent
-    proxies = prepare_proxy_adresses("residential")
+    proxies = prepare_proxy_adresses(proxy_type)
     proxies["http://"] = proxies["http"]
     proxies["https://"] = proxies["https"]
     proxies.pop("http")
@@ -250,6 +254,7 @@ if __name__ == "__main__":
     faulthandler.dump_traceback_later(60)
     ingest_photos_expanded_napi_bigquery(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
+        proxy_type="datacenter",
         batch_size=30,
         total_record_size=300,
     )
