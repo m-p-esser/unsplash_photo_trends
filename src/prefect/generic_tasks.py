@@ -172,13 +172,16 @@ def request_unsplash_napi(
     cache_expiration=datetime.timedelta(hours=1),
 )
 async def request_unsplash_napi_async(
-    endpoint: str, proxies: dict = None, headers: dict = None, params: dict = None
+    endpoint: str,
+    proxies: dict = None,
+    headers: dict = None,
+    params: dict = None,
+    base_url="https://unsplash.com/napi",
 ):
     logger = get_run_logger()
 
     async with httpx.AsyncClient(proxies=proxies, verify=False) as client:
-        BASE_URL = "https://unsplash.com/napi"
-        URI = BASE_URL + endpoint
+        URI = base_url + endpoint
 
         # sleep_seconds = random.randint(1, 3)
         # logger.info(f"Sleeping for {sleep_seconds} seconds...")
