@@ -78,7 +78,7 @@ deploy-ingest-photos-napi-gcs: ## Deploy Ingest Photos NAPI GCS Flow as Google C
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
 		--output deployments/ingest-photos-napi-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
-		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "per_page": 30 }' \
+		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "per_page": 30, "proxy_type": "datacenter" }' \
 		--cron "*/10 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
@@ -93,7 +93,7 @@ deploy-ingest-photos-expanded-napi-bigquery: ## Deploy Ingest Photos expanded NA
 		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
 		--output deployments/ingest-photos-expanded-napi-bigquery-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
-		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "batch_size": 30, "total_record_size": 90 }' \
+		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "proxy_type": "datacenter", "batch_size": 30, "total_record_size": 90 }' \
 		--timezone 'Europe/Berlin' \
 		--cron "*/2 * * * *" \
 		--apply
