@@ -20,7 +20,7 @@ from src.prefect.generic_tasks import (
     create_random_ua_string,
     parse_response,
     prepare_proxy_adresses,
-    request_unsplash,
+    request_unsplash_api,
     request_unsplash_napi,
 )
 from src.utils import load_env_variables, timer
@@ -35,7 +35,7 @@ def request_first_page(
     logger = get_run_logger()
     logger.info(f"Requesting page number 1 of https://api.unsplash.com/photos endpoint")
 
-    response = request_unsplash("/photos", params)
+    response = request_unsplash_api("/photos", params)
 
     return response
 
