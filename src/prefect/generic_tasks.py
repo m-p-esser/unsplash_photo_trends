@@ -129,29 +129,6 @@ def request_unsplash_api(
     return response
 
 
-@task(retries=3, retry_delay_seconds=10)
-def request_unsplash_napi(
-    endpoint: str,
-    proxies: dict = None,
-    headers: dict = None,
-    params: dict = {"per_page": 30},
-    base_url: str = "https://unsplash.com/napi",
-) -> requests.Response:
-    """Request data from inofficial Backend Unsplash API Endpoint(napi)"""
-    logger = get_run_logger()
-
-    URI = base_url + endpoint
-
-    logger.info(f"Requesting URI: {URI}")
-    response = requests.get(
-        url=URI, params=params, proxies=proxies, verify=False, headers=headers
-    )
-
-    response.raise_for_status()
-
-    return response
-
-
 @task(
     # cache_key_fn=task_input_hash,
     # cache_expiration=datetime.timedelta(hours=1),
@@ -164,7 +141,7 @@ async def request_unsplash_napi_async(
     params: dict = None,
     base_url="https://unsplash.com/napi",
 ):
-    """Asynchrously request data from inofficial Backend Unsplash API Endpoint (napi)"""
+    """Asynchrously request data Unsplash API endpoint"""
     logger = get_run_logger()
 
     async with httpx.AsyncClient(proxies=proxies, verify=False) as client:
