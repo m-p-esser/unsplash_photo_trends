@@ -177,7 +177,7 @@ async def request_unsplash_napi_async(
     # cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=20,
 )
-def upload_file_to_gcs(
+def upload_file_to_gcs_bucket(
     gcp_credential_block_name: str,
     bucket_name: str,
     contents,
