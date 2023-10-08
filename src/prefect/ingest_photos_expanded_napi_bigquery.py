@@ -112,7 +112,7 @@ def write_request_log_to_bigquery(
     return results
 
 
-@flow(timeout_seconds=120)  # Main Flow (1st level) # Main Flow (1st level)
+@flow(timeout_seconds=180)  # Main Flow (1st level) # Main Flow (1st level)
 @timer
 def ingest_photos_expanded_napi_bigquery(
     gcp_credential_block_name: str,
