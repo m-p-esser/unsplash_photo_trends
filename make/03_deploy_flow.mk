@@ -64,7 +64,7 @@ deploy-ingest-photos-gcs: ## Deploy Ingest Photos GCS Flow as Google Cloud Run
 		--output deployments/ingest-photos-gcs-${ENV}-deployment.yaml \
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "proxy_type": "datacenter", "batch_size": 20, "total_record_size": 80 }' \
-		--cron "*/3 * * * *" \
+		--cron "*/4 * * * *" \
 		--timezone 'Europe/Berlin' \
 		--apply
 
