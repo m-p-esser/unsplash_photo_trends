@@ -70,10 +70,8 @@ def get_downloaded_photos_from_logs(
 
 
 @flow(
-    timeout_seconds=60,
+    timeout_seconds=120,
     task_runner=ConcurrentTaskRunner(),
-    retries=3,
-    retry_delay_seconds=5,
 )  # Subflow (2nd level)
 def request_photos(
     batch: list[tuple[str, str, datetime.datetime]],
@@ -107,9 +105,6 @@ def request_photos(
 
 @flow(
     timeout_seconds=120,
-    task_runner=ConcurrentTaskRunner(),
-    retries=3,
-    retry_delay_seconds=5,
 )  # Subflow (2nd level)
 def upload_files_to_gcs_bucket(
     photos: list[tuple],
@@ -117,22 +112,25 @@ def upload_files_to_gcs_bucket(
     bucket_name: str,
     file_extension: str,
 ) -> list[tuple[str, prefect.futures.PrefectFuture]]:
-    """Asynchonously upload photos to GCS"""
+    """Upload photos to GCS"""
     logger = get_run_logger()
 
     logger.info("Starting to upload photos to GCS")
 
     blobs = []
     for photo in photos:
-        future = upload_file_to_gcs_bucket.submit(
-            gcp_credential_block_name,
-            bucket_name,
-            photo[2].content,
-            photo[0],  # photo id
-            file_extension,
-            f"{photo[1].year}-{photo[1].month}",  # created at
-        )
-        blobs.append((photo[0], future))
+        try:
+            blob_name = upload_file_to_gcs_bucket(
+                gcp_credential_block_name,
+                bucket_name,
+                photo[2].content,
+                photo[0],  # photo id
+                file_extension,
+                f"{photo[1].year}-{photo[1].month}",  # created at
+            )
+            blobs.append((photo[0], blob_name))
+        except Exception as e:
+            logger.error(f"Exception occured: {e}")
 
     # logger.info("Finished uploading photos to GCS")
 
@@ -236,12 +234,12 @@ def ingest_photos_gcs(
                 requested_photos, gcp_credential_block_name, bucket_name, "jpg"
             )
 
-            # Store all sucessfully uploaded photo ids
-            uploaded_photos = [blob[0] for blob in blobs if blob[1].is_completed()]
-            uploaded_photos_ids = [
-                p.split("/")[-1].split(".")[0] for p in uploaded_photos
-            ]
-            logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
+            # # Store all sucessfully uploaded photo ids
+            # uploaded_photos = [blob[0] for blob in blobs if blob[1].is_completed()]
+            # uploaded_photos_ids = [
+            #     p.split("/")[-1].split(".")[0] for p in uploaded_photos
+            # ]
+            # logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
 
             # Log written records to Bigquery
             download_log_records = []
@@ -249,7 +247,7 @@ def ingest_photos_gcs(
             for p in requested_photos:
                 photo_id = p[0]
                 response = p[2]
-                if response.status_code == 200 and photo_id in uploaded_photos_ids:
+                if response.status_code == 200 and photo_id in blobs:
                     request_url = str(response.request.url)
                     request_id = response.headers["x-imgix-id"]
 
@@ -269,13 +267,13 @@ def ingest_photos_gcs(
             )
 
             total_requested_photos += len(requested_photos)
-            total_uploaded_photos += len(uploaded_photos)
+            # total_uploaded_photos += len(uploaded_photos)
             total_logged_records += len(download_log_records)
             total_records_iterated += batch_size
 
             logger.info("Batch processed")
             logger.info(f"Requested photos (in batch): {len(requested_photos)}")
-            logger.info(f"Uploaded photos (in batch): {len(uploaded_photos)}")
+            # logger.info(f"Uploaded photos (in batch): {len(uploaded_photos)}")
             logger.info(f"Records logged (in batch): {len(download_log_records)}")
             logger.info(f"Records iterated (in batch): {batch_size}")
             logger.info(f"Requested photos (in run): {total_requested_photos}")
