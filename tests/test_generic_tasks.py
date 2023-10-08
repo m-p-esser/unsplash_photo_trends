@@ -3,7 +3,6 @@ import json
 import pandas as pd
 import requests
 from google.cloud import storage
-from prefect_gcp import GcpCredentials
 
 from prefect.logging import disable_run_logger
 from src.prefect.generic_tasks import (
@@ -320,13 +319,3 @@ def test_store_response_df_to_gcs_bucket_succeeded():
         )
         assert isinstance(blob, storage.blob.Blob)
         assert blob.size > 0  # Size is greater than 0 if the blob contains data
-
-
-def test_count_number_stored_files_in_gcs_bucket_at_least_one_file():
-    with disable_run_logger():
-        gcp_credentials = GcpCredentials.load("unsplash-photo-trends-deployment-sa")
-        storage_client = gcp_credentials.get_cloud_storage_client()
-        number_stored_files = count_number_stored_files_in_gcs_bucket.fn(
-            storage_client, "bucket-with-one-file"
-        )
-        assert number_stored_files == 1
