@@ -1,19 +1,18 @@
 """ Ingest actual photos (not metadata) to GCS using Download Links from Bigquery """
 
-import asyncio
 import datetime
-import faulthandler
 from typing import Literal
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
 
+import prefect
 from prefect import flow, get_run_logger
 from prefect.task_runners import ConcurrentTaskRunner
 from src.prefect.generic_tasks import (
     create_random_ua_string,
     prepare_proxy_adresses,
-    request_unsplash_api_async,
+    request_unsplash_api,
     upload_file_to_gcs_bucket,
 )
 from src.utils import load_env_variables
@@ -63,73 +62,71 @@ def get_downloaded_photos_from_logs(
     results = bigquery_query(query, gcp_credentials, location=location)
     results = [result[0] for result in results]
 
-    logger.info(f"Already downloaded {len(results)} photos")
+    logger.info(
+        f"{len(results)} photos have been downloaded and stored in previous run"
+    )
 
     return results
 
 
 @flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
-async def request_unsplash_api(
+def request_photos(
     batch: list[tuple[str, str, datetime.datetime]],
     proxies: dict = None,
     headers: dict = None,
     params: dict = None,
     base_url: str = "https://images.unsplash.com",
-):
+) -> list[tuple[str, datetime.datetime, prefect.futures.PrefectFuture]]:
     """Asynchronously request images from Unsplash"""
 
     logger = get_run_logger()
 
     logger.info("Starting to request images from Unsplash")
 
-    tasks = [
-        request_unsplash_api_async(
-            endpoint=photo[1].replace(base_url, ""),  # download path
-            proxies=proxies,
-            headers=headers,
-            params=params,
-            base_url=base_url,
-            photo_id=photo[0],
-            created_at=photo[
-                2
-            ],  # created at -> when has the photo been uploaded to unsplash
+    photos = []
+
+    for photo in batch:
+        endpoint = photo[1].replace(base_url, "")  # download path
+        photo_id = photo[0]
+        created_at = photo[2]
+
+        future = request_unsplash_api.submit(
+            endpoint, proxies, headers, params, base_url
         )
-        for photo in batch
-    ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+        photos.append((photo_id, created_at, future))
 
-    logger.info("Finished requesting images from Unsplash")
+    logger.info(f"Finished requesting images from Unsplash")
 
-    return results
+    return photos
 
 
-@flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
-async def upload_files_to_gcs_bucket(
-    results: list[dict],
+@flow(timeout_seconds=120, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
+def upload_files_to_gcs_bucket(
+    photos: list[tuple],
     gcp_credential_block_name: str,
     bucket_name: str,
     file_extension: str,
-):
+) -> list[tuple[str, prefect.futures.PrefectFuture]]:
     """Asynchonously upload photos to GCS"""
     logger = get_run_logger()
 
     logger.info("Starting to upload photos to GCS")
 
-    futures = []
-    for result in results:
+    blobs = []
+    for photo in photos:
         future = upload_file_to_gcs_bucket.submit(
             gcp_credential_block_name,
             bucket_name,
-            result["response"].content,
-            result["photo_id"],
+            photo[2].content,
+            photo[0],  # photo id
             file_extension,
-            f"{result['created_at'].year}-{result['created_at'].month}",
+            f"{photo[1].year}-{photo[1].month}",  # created at
         )
-        futures.append(future)
+        blobs.append((photo[0], future))
 
     logger.info("Finished uploading photos to GCS")
 
-    return futures
+    return blobs
 
 
 @flow(retries=3, retry_delay_seconds=3)  # Subflow (2nd level)
@@ -178,7 +175,6 @@ def ingest_photos_gcs(
 
     # Get all downloadable photos (Bigquery)
     downloadable_photos = get_downloadable_photos_from_logs(gcp_credentials, env)
-
     # Get already downloaded photos (Bigquery)
     downloaded_photos = get_downloaded_photos_from_logs(gcp_credentials, env)
 
@@ -186,25 +182,27 @@ def ingest_photos_gcs(
     downloadable_photo_ids = [p[0] for p in downloadable_photos]
     remaining_photo_ids = set(downloadable_photo_ids).difference(set(downloaded_photos))
 
-    if len(remaining_photo_ids) == 0:
-        logger.info(f"Job finished")
-        logger.info(f"All ({total_record_size}) photos downloaded")
-
-    # Split request load in batches
+    # Isolate remaining photos and create a smaller subset
     remaining_photos = [p for p in downloadable_photos if p[0] in remaining_photo_ids][
         0:total_record_size
     ]
+    # Split request load in batches
     batches = [
         remaining_photos[i : i + batch_size]
         for i in range(0, len(remaining_photo_ids), batch_size)
     ]
 
+    if len(remaining_photo_ids) == 0:
+        logger.info(f"Job finished")
+        logger.info(f"All ({total_record_size}) photos downloaded")
+
+    total_requested_photos = 0
+    total_uploaded_photos = 0
+    total_logged_records = 0
     total_records_iterated = 0
-    total_blobs_uploaded = 0
 
     while len(remaining_photos) > 0 and total_records_iterated < total_record_size:
-        # Request and write data
-
+        # Request and store photos
         for batch in batches:
             # Prepare Proxy and Useragent
             proxies = prepare_proxy_adresses(proxy_type)
@@ -218,38 +216,32 @@ def ingest_photos_gcs(
             headers = {"User-Agent": useragent_string}  # Overwrite Useragent
 
             # Async - Request photos
-            results = request_unsplash_api(batch, proxies, headers)
-            logger.info(f"Results of requesting unsplash: \n{results}")
+            photos = request_photos(batch, proxies, headers)
+            requested_photos = [(p[0], p[1], p[2].result()) for p in photos]
+            logger.info(f"Requested Photos: \n{requested_photos}")
 
             # Async - Upload photos to Google Cloud Storage
             bucket_name = f"photos-editorial-{env}"
-            futures = upload_files_to_gcs_bucket(
-                results, gcp_credential_block_name, bucket_name, "jpg"
+            blobs = upload_files_to_gcs_bucket(
+                photos, gcp_credential_block_name, bucket_name, "jpg"
             )
-            logger.info(f"Futures of uploading files: \n{results}")
 
-            # Store all sucessfully uploaded photos
-            uploaded_blobs = [
-                future.result() for future in futures if not future.is_failed()
+            # Store all sucessfully uploaded photo ids
+            uploaded_photos = [blob[0] for blob in blobs if blob[1].is_completed()]
+            uploaded_photos_ids = [
+                p.split("/")[-1].split(".")[0] for p in uploaded_photos
             ]
-            uploaded_photo_ids = [
-                blob.split("/")[-1].split(".")[0] for blob in uploaded_blobs
-            ]
-
-            total_blobs_uploaded += len(uploaded_blobs)
+            logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
 
             # Log written records to Bigquery
             download_log_records = []
 
-            for result in results:
-                if (
-                    result["response"].status_code == 200
-                    and result["photo_id"] in uploaded_photo_ids
-                ):
-                    response = result["response"]
+            for p in requested_photos:
+                photo_id = p[0]
+                response = p[2]
+                if response.status_code == 200 and photo_id in uploaded_photos_ids:
                     request_url = str(response.request.url)
                     request_id = response.headers["x-imgix-id"]
-                    photo_id = result["photo_id"]
 
                     download_log_record = {
                         "request_id": request_id,
@@ -262,26 +254,33 @@ def ingest_photos_gcs(
 
                     download_log_records.append(download_log_record)
 
-            write_download_log_to_bigquery(gcp_credentials, download_log_records, env)
+            logged_records = write_download_log_to_bigquery(
+                gcp_credentials, download_log_records, env
+            )
 
+            total_requested_photos += len(requested_photos)
+            total_uploaded_photos += len(uploaded_photos)
+            total_logged_records += len(download_log_records)
             total_records_iterated += batch_size
-            logger.info(
-                f"Batch processed: {len(download_log_records)} of {batch_size} blobs uploaded to GCS"
-            )
 
-            logger.info(
-                f"In this run: {total_blobs_uploaded} of {total_records_iterated} blobs uploaded to GCS"
-            )
+            logger.info("Batch processed")
+            logger.info(f"Requested photos (in batch): {len(requested_photos)}")
+            logger.info(f"Uploaded photos (in batch): {len(uploaded_photos)}")
+            logger.info(f"Records logged (in batch): {len(download_log_records)}")
+            logger.info(f"Records iterated (in batch): {batch_size}")
+            logger.info(f"Requested photos (in run): {total_requested_photos}")
+            logger.info(f"Uploaded photos (in run): {total_uploaded_photos}")
+            logger.info(f"Records logged (in run): {total_logged_records}")
+            logger.info(f"Records iterated (in run): {total_records_iterated}")
 
             if total_records_iterated == total_record_size:
-                logger.info(f"Job finished")
                 logger.info(f"Iterated trough all records ({total_record_size})")
+                logger.info("Job finished")
                 break
 
 
 if __name__ == "__main__":
     # @see https://github.com/PrefectHQ/prefect/pull/8983
-    faulthandler.dump_traceback_later(60)
     ingest_photos_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         proxy_type="datacenter",
