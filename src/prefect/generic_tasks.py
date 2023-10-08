@@ -169,8 +169,6 @@ def request_unsplash_napi(
     cache_key_fn=task_input_hash,
     cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=20,
-    retry_delay_seconds=1,
-    retries=3,
 )
 async def request_unsplash_napi_async(
     endpoint: str,
