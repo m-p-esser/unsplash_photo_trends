@@ -159,6 +159,7 @@ async def request_unsplash_api_async(
 @task(
     cache_key_fn=task_input_hash,
     cache_expiration=datetime.timedelta(hours=1),
+    timeout_seconds=90,
 )
 def upload_file_to_gcs_bucket(
     gcp_credential_block_name: str,
