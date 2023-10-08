@@ -160,7 +160,7 @@ async def request_unsplash_api_async(
     # cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=90,
 )
-def upload_file_to_gcs_bucket(
+async def upload_file_to_gcs_bucket(
     gcp_credential_block_name: str,
     bucket_name: str,
     contents,
@@ -179,9 +179,9 @@ def upload_file_to_gcs_bucket(
         bucket_name, contents, blob_name, gcp_credential_block_name
     )
 
-    logger.info(f"Uploaded {blob}: {blob_name} to {bucket_name}")
+    logger.info(f"Uploaded {blob}: {blob.name} to {bucket_name}")
 
-    return blob.name
+    return blob
 
 
 @task(retries=3, retry_delay_seconds=10)
