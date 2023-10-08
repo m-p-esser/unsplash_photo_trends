@@ -14,7 +14,7 @@ from src.prefect.generic_tasks import (
     create_random_ua_string,
     prepare_proxy_adresses,
     request_unsplash_napi_async,
-    upload_file_to_gcs,
+    upload_file_to_gcs_bucket,
 )
 from src.utils import load_env_variables
 
@@ -104,7 +104,7 @@ async def request_unsplash_napi(
 
 
 @flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
-async def upload_files_to_gcs(
+async def upload_files_to_gcs_bucket(
     results: list[dict],
     gcp_credential_block_name: str,
     bucket_name: str,
@@ -117,7 +117,7 @@ async def upload_files_to_gcs(
 
     futures = []
     for result in results:
-        future = upload_file_to_gcs.submit(
+        future = upload_file_to_gcs_bucket.submit(
             gcp_credential_block_name,
             bucket_name,
             result["response"].content,
@@ -165,7 +165,7 @@ def ingest_photos_gcs(
     batch_size: int,
     total_record_size: int,
 ):
-    """Flow to download photos from unsplash and store them in GCS"""
+    """Flow to download photos from unsplash and store them in Google Cloud Storage Bucket"""
 
     logger = get_run_logger()
 
@@ -223,7 +223,7 @@ def ingest_photos_gcs(
 
             # Async - Upload photos to Google Cloud Storage
             bucket_name = f"photos-editorial-{env}"
-            futures = upload_files_to_gcs(
+            futures = upload_files_to_gcs_bucket(
                 results, gcp_credential_block_name, bucket_name, "jpg"
             )
             logger.info(f"Futures of uploading files: \n{results}")
