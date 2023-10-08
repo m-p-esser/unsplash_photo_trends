@@ -95,7 +95,7 @@ def request_photos(
         )
         photos.append((photo_id, created_at, future))
 
-    logger.info(f"Finished requesting images from Unsplash")
+    # logger.info(f"Finished requesting images from Unsplash")
 
     return photos
 
@@ -124,7 +124,7 @@ def upload_files_to_gcs_bucket(
         )
         blobs.append((photo[0], future))
 
-    logger.info("Finished uploading photos to GCS")
+    # logger.info("Finished uploading photos to GCS")
 
     return blobs
 
