@@ -35,7 +35,7 @@ def request_first_page(
     logger = get_run_logger()
     logger.info(f"Requesting page number 1 of https://api.unsplash.com/photos endpoint")
 
-    response = request_unsplash_api("/photos", params)
+    response = request_unsplash_api(endpoint="/photos", params=params)
 
     return response
 

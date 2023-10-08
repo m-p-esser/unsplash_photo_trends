@@ -17,7 +17,7 @@ def request_topics() -> list[dict]:
     """Request topics (= photography genres which have a seperate content site on unsplash) from Unsplash API"""
 
     endpoint = "/topics/"
-    response = request_unsplash_api(endpoint)
+    response = request_unsplash_api(endpoint=endpoint)
 
     return response
 

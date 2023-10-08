@@ -16,7 +16,7 @@ def request_monthly_platform_stats() -> list[dict]:
     """Request monthly platform statistics (e.g. number of photos or downloads) from Unsplash API"""
 
     endpoint = "/stats/month/"
-    response = request_unsplash_api(endpoint)
+    response = request_unsplash_api(endpoint=endpoint)
 
     return response
 
