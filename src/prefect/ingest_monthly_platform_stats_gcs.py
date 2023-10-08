@@ -3,7 +3,7 @@
 from prefect import flow
 from src.prefect.generic_tasks import (
     parse_response,
-    request_unsplash,
+    request_unsplash_api,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
@@ -16,7 +16,7 @@ def request_monthly_platform_stats() -> list[dict]:
     """Request monthly platform statistics (e.g. number of photos or downloads) from Unsplash API"""
 
     endpoint = "/stats/month/"
-    response = request_unsplash(endpoint)
+    response = request_unsplash_api(endpoint)
 
     return response
 
