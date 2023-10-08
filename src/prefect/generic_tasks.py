@@ -197,10 +197,9 @@ async def request_unsplash_napi_async(
 
 
 @task(
-    retries=3,
-    retry_delay_seconds=3,
     cache_key_fn=task_input_hash,
     cache_expiration=datetime.timedelta(hours=1),
+    timeout_seconds=20,
 )
 def upload_file_to_gcs(
     gcp_credential_block_name: str,
