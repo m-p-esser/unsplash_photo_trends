@@ -23,7 +23,7 @@ deploy-ingest-topics-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
 		--pool ${ENV}-cloud-run-push-work-pool \
 		--cron "0 9 * * *" \
 		--timezone 'Europe/Berlin' \
-		--applyö
+		--apply
 
 .PHONY: deploy-healthcheck
 deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
