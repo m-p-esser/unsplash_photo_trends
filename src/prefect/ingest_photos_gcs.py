@@ -69,7 +69,12 @@ def get_downloaded_photos_from_logs(
     return results
 
 
-@flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
+@flow(
+    timeout_seconds=60,
+    task_runner=ConcurrentTaskRunner(),
+    retries=3,
+    retry_delay_seconds=5,
+)  # Subflow (2nd level)
 def request_photos(
     batch: list[tuple[str, str, datetime.datetime]],
     proxies: dict = None,
