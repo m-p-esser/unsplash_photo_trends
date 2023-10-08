@@ -10,7 +10,7 @@ from src.prefect.generic_tasks import (
     create_random_ua_string,
     parse_response,
     prepare_proxy_adresses,
-    request_unsplash,
+    request_unsplash_api,
     request_unsplash_napi,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
@@ -33,7 +33,7 @@ def test_prepare_bright_data_proxies_successful():
 
 def test_request_unsplash_successful():
     with disable_run_logger():
-        response = request_unsplash.fn(endpoint="/topics/")
+        response = request_unsplash_api.fn(endpoint="/topics/")
         assert response.status_code == 200
 
 
