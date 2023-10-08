@@ -11,7 +11,6 @@ from src.prefect.generic_tasks import (
     parse_response,
     prepare_proxy_adresses,
     request_unsplash_api,
-    request_unsplash_napi,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
@@ -40,7 +39,7 @@ def test_request_unsplash_successful():
 def test_request_unsplash_napi_successful():
     with disable_run_logger():
         proxies = prepare_proxy_adresses.fn(proxy_type="residential")
-        response = request_unsplash_napi.fn(
+        response = request_unsplash_api.fn(
             endpoint="/photos",
             proxies=proxies,
             params={"per_page": 30, "order_by": "oldest", "page": 1},
