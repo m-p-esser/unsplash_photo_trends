@@ -86,14 +86,15 @@ def inspect_request(proxies: dict, headers: dict):
 
 @task(retries=3, retry_delay_seconds=10)
 def request_unsplash(
-    endpoint: str, params: dict = {"per_page": 30}
+    endpoint: str,
+    params: dict = {"per_page": 30},
+    base_url: str = "https://api.unsplash.com",
 ) -> requests.Response:
     """Request data from official Unsplash API Endpoint"""
     logger = get_run_logger()
 
     params["client_id"] = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
-    BASE_URL = "https://api.unsplash.com"
-    URI = BASE_URL + endpoint
+    URI = base_url + endpoint
 
     logger.info(f"Requesting endpoint: {URI}")
     response = requests.get(url=URI, params=params)
@@ -124,12 +125,12 @@ def request_unsplash_napi(
     proxies: dict = None,
     headers: dict = None,
     params: dict = {"per_page": 30},
+    base_url: str = "https://unsplash.com/napi",
 ) -> requests.Response:
     """Request data from inofficial Backend Unsplash API Endpoint(napi)"""
     logger = get_run_logger()
 
-    BASE_URL = "https://unsplash.com/napi"
-    URI = BASE_URL + endpoint
+    URI = base_url + endpoint
 
     logger.info(f"Requesting URI: {URI}")
     response = requests.get(
