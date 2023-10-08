@@ -170,7 +170,7 @@ def upload_file_to_gcs_bucket(
     file_name: str,
     file_extension: str,
     folder: str = None,
-) -> storage.blob.Blob:
+):
     logger = get_run_logger()
 
     if folder is None:
@@ -183,8 +183,6 @@ def upload_file_to_gcs_bucket(
     )
 
     logger.info(f"Uploaded {blob}: {blob.name} to {bucket_name}")
-
-    return blob
 
 
 @task(retries=3, retry_delay_seconds=10)
