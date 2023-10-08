@@ -84,36 +84,47 @@ def inspect_request(proxies: dict, headers: dict):
 
 
 @task(retries=3, retry_delay_seconds=10)
-def request_unsplash(
+def request_unsplash_api(
     endpoint: str,
+    proxies: dict = None,
+    headers: dict = None,
     params: dict = {"per_page": 30},
     base_url: str = "https://api.unsplash.com",
 ) -> requests.Response:
-    """Request data from official Unsplash API Endpoint"""
+    """Request data from Unsplash API Endpoint"""
     logger = get_run_logger()
 
-    params["client_id"] = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
+    # Add API key to params if official API endpoint
+    if base_url == "https://api.unsplash.com":
+        params["client_id"] = Secret.load(
+            "unsplash-photo-trends-unsplash-access-key"
+        ).get()
+
     URI = base_url + endpoint
 
     logger.info(f"Requesting endpoint: {URI}")
-    response = requests.get(url=URI, params=params)
+    response = requests.get(
+        url=URI, params=params, proxies=proxies, verify=False, headers=headers
+    )
 
     response.raise_for_status()
 
-    rate_limit_limit = int(response.headers["X-Ratelimit-Limit"])
-    rate_limit_remaining = int(response.headers["X-Ratelimit-Remaining"])
-    consumed_quota = (rate_limit_limit - rate_limit_remaining) / rate_limit_limit
+    # Check Rate Limiting
+    if base_url == "https://api.unsplash.com":
+        rate_limit_limit = int(response.headers["X-Ratelimit-Limit"])
+        rate_limit_remaining = int(response.headers["X-Ratelimit-Remaining"])
+        consumed_quota = (rate_limit_limit - rate_limit_remaining) / rate_limit_limit
 
-    if consumed_quota > 0.8:
-        logger.warning(
-            f"Rate limit almost reached: {consumed_quota*100} % of Quota consumed"
-        )
-        logger.warning(f"Remaining requests: {rate_limit_remaining}")
+        if consumed_quota > 0.8:
+            logger.warning(
+                f"Rate limit almost reached: {consumed_quota*100} % of Quota consumed"
+            )
+            logger.warning(f"Remaining requests: {rate_limit_remaining}")
 
-    if rate_limit_remaining == 0:
-        logger.error(
-            f"Rate limit reached: {consumed_quota*100} % of Quota consumed. Wait to continue"
-        )
+        if rate_limit_remaining == 0:
+            logger.error(
+                f"Rate limit reached: {consumed_quota*100} % of Quota consumed. Wait to continue"
+            )
 
     return response
 
@@ -152,6 +163,32 @@ async def request_unsplash_napi_async(
     headers: dict = None,
     params: dict = None,
     base_url="https://unsplash.com/napi",
+):
+    """Asynchrously request data from inofficial Backend Unsplash API Endpoint (napi)"""
+    logger = get_run_logger()
+
+    async with httpx.AsyncClient(proxies=proxies, verify=False) as client:
+        URI = base_url + endpoint
+
+        logger.info(f"Requesting URI: {URI}")
+        response = await client.get(url=URI, params=params, headers=headers)
+
+        response.raise_for_status()
+
+        return response
+
+
+@task(
+    # cache_key_fn=task_input_hash,
+    # cache_expiration=datetime.timedelta(hours=1),
+    timeout_seconds=20,
+)
+async def request_unsplash_images_async(
+    endpoint: str,
+    proxies: dict = None,
+    headers: dict = None,
+    params: dict = None,
+    base_url="https://images.unsplash.com",
     **kwargs,
 ):
     logger = get_run_logger()
