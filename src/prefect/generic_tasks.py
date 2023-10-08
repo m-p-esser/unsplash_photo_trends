@@ -16,7 +16,6 @@ from google.cloud import storage
 from prefect import get_run_logger, task
 from prefect.blocks.system import Secret
 from src.etl.load import upload_blob_from_file, upload_blob_from_memory
-from src.utils import timer
 
 
 @task
@@ -86,11 +85,10 @@ def inspect_request(proxies: dict, headers: dict):
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def request_unsplash(
     endpoint: str, params: dict = {"per_page": 30}
 ) -> requests.Response:
-    """Request data from Unsplash API"""
+    """Request data from official Unsplash API Endpoint"""
     logger = get_run_logger()
 
     params["client_id"] = Secret.load("unsplash-photo-trends-unsplash-access-key").get()
@@ -121,14 +119,13 @@ def request_unsplash(
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def request_unsplash_napi(
     endpoint: str,
     proxies: dict = None,
     headers: dict = None,
     params: dict = {"per_page": 30},
 ) -> requests.Response:
-    """Request data from Unsplash API (napi, Backend API)"""
+    """Request data from inofficial Backend Unsplash API Endpoint(napi)"""
     logger = get_run_logger()
 
     BASE_URL = "https://unsplash.com/napi"
@@ -205,7 +202,6 @@ def upload_file_to_gcs(
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def parse_response(response: requests.Response) -> dict:
     """Convert Response to Dict"""
     logger = get_run_logger()
@@ -220,7 +216,6 @@ def parse_response(response: requests.Response) -> dict:
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def response_data_to_df(response_json: dict, response_data_name: str) -> pd.DataFrame:
     """Store Response data as in Dataframe"""
 
@@ -255,7 +250,6 @@ def response_data_to_df(response_json: dict, response_data_name: str) -> pd.Data
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def store_response_df_to_gcs_bucket(
     df: pd.DataFrame, response_data_name: str, env: str = "dev"
 ) -> storage.blob.Blob:
@@ -280,7 +274,6 @@ def store_response_df_to_gcs_bucket(
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def count_number_stored_files_in_gcs_bucket(storage_client, bucket_name: str) -> int:
     """Count the number of files / blobs stored in Google Cloud Storage Bucket"""
 
@@ -296,7 +289,6 @@ def count_number_stored_files_in_gcs_bucket(storage_client, bucket_name: str) ->
 
 
 @task(retries=3, retry_delay_seconds=10)
-@timer
 def get_processing_progress_from_response_header(
     response, number_stored_photos: int
 ) -> dict:
