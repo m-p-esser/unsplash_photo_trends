@@ -2,7 +2,6 @@
 
 import datetime
 import json
-import math
 import random
 from tempfile import NamedTemporaryFile
 from typing import Literal
@@ -272,48 +271,3 @@ def store_response_df_to_gcs_bucket(
         logger.info(f"Uploaded topics data to {blob}")
 
         return blob
-
-
-@task(retries=3, retry_delay_seconds=10)
-def count_number_stored_files_in_gcs_bucket(storage_client, bucket_name: str) -> int:
-    """Count the number of files / blobs stored in Google Cloud Storage Bucket"""
-
-    logger = get_run_logger()
-
-    bucket = storage_client.get_bucket(bucket_name)
-    blobs = bucket.list_blobs()
-    number_stored_files = sum(1 for _ in blobs)
-
-    logger.info(f"Number of files in '{bucket.name}': {number_stored_files}")
-
-    return int(number_stored_files)
-
-
-@task(retries=3, retry_delay_seconds=10)
-def get_processing_progress_from_response_header(
-    response, number_stored_photos: int
-) -> dict:
-    """Use Response header data to calculate how many pages/objects have been processed
-    and how many pages/objects still need to be processed"""
-
-    logger = get_run_logger()
-
-    number_requestable_objects = int(response.headers["X-Total"])
-    number_objects_per_page = int(response.headers["X-Per-Page"])
-    last_page_number = math.ceil(number_requestable_objects / number_objects_per_page)
-    remaining_number_objects_to_request = (
-        number_requestable_objects - number_stored_photos
-    )
-    number_processed_pages = math.floor(number_stored_photos / number_objects_per_page)
-
-    processing_progress = {
-        "number_requestable_objects": number_requestable_objects,
-        "number_objects_per_page": number_objects_per_page,
-        "last_page_number": last_page_number,
-        "remaining_number_objects_to_request": remaining_number_objects_to_request,
-        "number_processed_pages": number_processed_pages,
-    }
-
-    logger.info(processing_progress)
-
-    return processing_progress
