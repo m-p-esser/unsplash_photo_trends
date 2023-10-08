@@ -160,37 +160,6 @@ async def request_unsplash_api_async(
     # cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=20,
 )
-async def request_unsplash_images_async(
-    endpoint: str,
-    proxies: dict = None,
-    headers: dict = None,
-    params: dict = None,
-    base_url="https://images.unsplash.com",
-    **kwargs,
-):
-    logger = get_run_logger()
-
-    async with httpx.AsyncClient(proxies=proxies, verify=False) as client:
-        URI = base_url + endpoint
-
-        logger.info(f"Requesting URI: {URI}")
-        response = await client.get(url=URI, params=params, headers=headers)
-
-        response.raise_for_status()
-
-        if len(kwargs) > 0:
-            kwargs["response"] = response
-            return kwargs
-
-        else:
-            return response
-
-
-@task(
-    # cache_key_fn=task_input_hash,
-    # cache_expiration=datetime.timedelta(hours=1),
-    timeout_seconds=20,
-)
 def upload_file_to_gcs_bucket(
     gcp_credential_block_name: str,
     bucket_name: str,
