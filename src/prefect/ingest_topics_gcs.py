@@ -3,7 +3,7 @@
 from prefect import flow
 from src.prefect.generic_tasks import (
     parse_response,
-    request_unsplash,
+    request_unsplash_api,
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
@@ -17,9 +17,9 @@ def request_topics() -> list[dict]:
     """Request topics (= photography genres which have a seperate content site on unsplash) from Unsplash API"""
 
     endpoint = "/topics/"
-    response_json = request_unsplash(endpoint)
+    response = request_unsplash_api(endpoint)
 
-    return response_json
+    return response
 
 
 @flow
