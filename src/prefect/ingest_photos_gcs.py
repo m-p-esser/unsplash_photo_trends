@@ -223,7 +223,7 @@ def ingest_photos_gcs(
             # Async - Upload photos to Google Cloud Storage
             bucket_name = f"photos-editorial-{env}"
             blobs = upload_files_to_gcs_bucket(
-                photos, gcp_credential_block_name, bucket_name, "jpg"
+                requested_photos, gcp_credential_block_name, bucket_name, "jpg"
             )
 
             # Store all sucessfully uploaded photo ids
