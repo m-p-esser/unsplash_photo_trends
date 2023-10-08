@@ -10,6 +10,7 @@ from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
 from prefect_gcp.credentials import GcpCredentials
 
 from prefect import flow, get_run_logger
+from prefect.task_runners import ConcurrentTaskRunner
 from src.prefect.generic_tasks import (
     create_random_ua_string,
     prepare_proxy_adresses,
@@ -21,7 +22,7 @@ from src.utils import load_env_variables
 
 @flow(
     retries=3,
-    retry_delay_seconds=10,
+    retry_delay_seconds=3,
 )  # Subflow (2nd level)
 def get_downloadable_photos_from_logs(
     gcp_credentials: GcpCredentials, env: str = "dev", location="europe-west3"
@@ -46,7 +47,7 @@ def get_downloadable_photos_from_logs(
 
 @flow(
     retries=3,
-    retry_delay_seconds=10,
+    retry_delay_seconds=3,
 )  # Subflow (2nd level)
 def get_downloaded_photos_from_logs(
     gcp_credentials: GcpCredentials, env: str = "dev", location="europe-west3"
@@ -68,7 +69,7 @@ def get_downloaded_photos_from_logs(
     return results
 
 
-@flow(timeout_seconds=120)  # Subflow (2nd level)
+@flow(timeout_seconds=60)  # Subflow (2nd level)
 async def request_unsplash_napi(
     batch: list[tuple[str, str, datetime.datetime]],
     proxies: dict = None,
@@ -96,7 +97,7 @@ async def request_unsplash_napi(
     return results
 
 
-@flow(timeout_seconds=120)  # Subflow (2nd level)
+@flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
 async def upload_files_to_gcs(
     results: list[dict],
     gcp_credential_block_name: str,
@@ -121,7 +122,7 @@ async def upload_files_to_gcs(
     logger.info("Finished uploading photos to GCS")
 
 
-@flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
+@flow(retries=3, retry_delay_seconds=3)  # Subflow (2nd level)
 def write_download_log_to_bigquery(
     gcp_credentials: GcpCredentials,
     records: list[dict],
