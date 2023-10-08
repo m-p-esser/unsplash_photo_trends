@@ -219,12 +219,14 @@ def ingest_photos_gcs(
 
             # Async - Request photos
             results = request_unsplash_napi(batch, proxies, headers)
+            logger.info(f"Results of requesting unsplash: \n{results}")
 
-            # Async - Upload photos to Blob Storage (using Photo ID as name)
+            # Async - Upload photos to Google Cloud Storage
             bucket_name = f"photos-editorial-{env}"
             futures = upload_files_to_gcs(
                 results, gcp_credential_block_name, bucket_name, "jpg"
             )
+            logger.info(f"Futures of uploading files: \n{results}")
 
             # Store all sucessfully uploaded photos
             uploaded_blobs = [
