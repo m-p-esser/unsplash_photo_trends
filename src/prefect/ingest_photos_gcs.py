@@ -8,6 +8,7 @@ from prefect_gcp.credentials import GcpCredentials
 
 import prefect
 from prefect import flow, get_run_logger
+from prefect.filesystems import GCS
 from prefect.task_runners import ConcurrentTaskRunner
 from src.prefect.generic_tasks import (
     create_random_ua_string,
@@ -72,6 +73,7 @@ def get_downloaded_photos_from_logs(
 @flow(
     timeout_seconds=120,
     task_runner=ConcurrentTaskRunner(),
+    result_storage=GCS(bucket_path="task-runs-prod"),
 )  # Subflow (2nd level)
 def request_photos(
     batch: list[tuple[str, str, datetime.datetime]],
@@ -104,7 +106,7 @@ def request_photos(
 
 
 @flow(
-    timeout_seconds=120,
+    timeout_seconds=120, result_storage=GCS(bucket_path="task-runs-prod")
 )  # Subflow (2nd level)
 def upload_files_to_gcs_bucket(
     photos: list[tuple],
