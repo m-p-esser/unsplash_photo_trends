@@ -13,7 +13,7 @@ from prefect.task_runners import ConcurrentTaskRunner
 from src.prefect.generic_tasks import (
     create_random_ua_string,
     prepare_proxy_adresses,
-    request_unsplash_napi_async,
+    request_unsplash_api_async,
     upload_file_to_gcs_bucket,
 )
 from src.utils import load_env_variables
@@ -69,7 +69,7 @@ def get_downloaded_photos_from_logs(
 
 
 @flow(timeout_seconds=60, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
-async def request_unsplash_napi(
+async def request_unsplash_api(
     batch: list[tuple[str, str, datetime.datetime]],
     proxies: dict = None,
     headers: dict = None,
@@ -83,7 +83,7 @@ async def request_unsplash_napi(
     logger.info("Starting to request images from Unsplash")
 
     tasks = [
-        request_unsplash_napi_async(
+        request_unsplash_api_async(
             endpoint=photo[1].replace(base_url, ""),  # download path
             proxies=proxies,
             headers=headers,
@@ -218,7 +218,7 @@ def ingest_photos_gcs(
             headers = {"User-Agent": useragent_string}  # Overwrite Useragent
 
             # Async - Request photos
-            results = request_unsplash_napi(batch, proxies, headers)
+            results = request_unsplash_api(batch, proxies, headers)
             logger.info(f"Results of requesting unsplash: \n{results}")
 
             # Async - Upload photos to Google Cloud Storage

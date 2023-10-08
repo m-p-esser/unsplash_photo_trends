@@ -15,7 +15,7 @@ from src.decoder import datetime_decoder
 from src.prefect.generic_tasks import (
     create_random_ua_string,
     prepare_proxy_adresses,
-    request_unsplash_napi_async,
+    request_unsplash_api_async,
 )
 from src.utils import load_env_variables, timer
 
@@ -47,12 +47,12 @@ def get_requested_photos_from_logs(
 
 
 @flow(timeout_seconds=120)  # Subflow (2nd level)
-async def request_unsplash_napi(
+async def request_unsplash_api(
     batch: list[str], proxies: dict = None, headers: dict = None, params: dict = None
 ):
     endpoints = [f"/photos/{photo_id}" for photo_id in batch]
     tasks = [
-        request_unsplash_napi_async(endpoint, proxies, headers, params)
+        request_unsplash_api_async(endpoint, proxies, headers, params)
         for endpoint in endpoints
     ]
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -185,7 +185,7 @@ def ingest_photos_expanded_napi_bigquery(
             logger.info(f"Will be using '{useragent_string}' to make next requests")
             headers = {"User-Agent": useragent_string}  # Overwrite Useragent
 
-            responses = request_unsplash_napi(batch, proxies, headers)
+            responses = request_unsplash_api(batch, proxies, headers)
 
             # Write photo metadata records to Bigquery
             records_photo_metadata = []

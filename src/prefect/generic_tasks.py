@@ -134,7 +134,7 @@ def request_unsplash_api(
     # cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=20,
 )
-async def request_unsplash_napi_async(
+async def request_unsplash_api_async(
     endpoint: str,
     proxies: dict = None,
     headers: dict = None,
