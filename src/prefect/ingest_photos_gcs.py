@@ -123,7 +123,7 @@ def upload_files_to_gcs_bucket(
             blob_name = upload_file_to_gcs_bucket(
                 gcp_credential_block_name,
                 bucket_name,
-                photo[2].content,
+                photo[2],  # photo as bytes
                 photo[0],  # photo id
                 file_extension,
                 f"{photo[1].year}-{photo[1].month}",  # created at
@@ -225,29 +225,32 @@ def ingest_photos_gcs(
 
             # Async - Request photos
             photos = request_photos(batch, proxies, headers)
-            requested_photos = [(p[0], p[1], p[2].result()) for p in photos]
-            logger.info(f"Requested Photos: \n{requested_photos}")
+            requested_photos = [
+                (p[0], p[1], p[2].result().content, p[2].result()) for p in photos
+            ]
+            logger.info(
+                f"Requested Photos: \n{[(p[0], p[1]) for p in requested_photos]}"
+            )
 
             # Async - Upload photos to Google Cloud Storage
             bucket_name = f"photos-editorial-{env}"
             blobs = upload_files_to_gcs_bucket(
                 requested_photos, gcp_credential_block_name, bucket_name, "jpg"
             )
+            logger.info(f"Uploaded Photos: {blobs}")
 
-            # # Store all sucessfully uploaded photo ids
+            # Store all sucessfully uploaded photo ids
             # uploaded_photos = [blob[0] for blob in blobs if blob[1].is_completed()]
-            # uploaded_photos_ids = [
-            #     p.split("/")[-1].split(".")[0] for p in uploaded_photos
-            # ]
-            # logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
+            uploaded_photos_ids = [b[0] for b in blobs]
+            logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
 
             # Log written records to Bigquery
             download_log_records = []
 
             for p in requested_photos:
                 photo_id = p[0]
-                response = p[2]
-                if response.status_code == 200 and photo_id in blobs:
+                response = p[3]
+                if response.status_code == 200 and photo_id in uploaded_photos_ids:
                     request_url = str(response.request.url)
                     request_id = response.headers["x-imgix-id"]
 
@@ -267,13 +270,13 @@ def ingest_photos_gcs(
             )
 
             total_requested_photos += len(requested_photos)
-            # total_uploaded_photos += len(uploaded_photos)
+            total_uploaded_photos += len(uploaded_photos_ids)
             total_logged_records += len(download_log_records)
             total_records_iterated += batch_size
 
             logger.info("Batch processed")
             logger.info(f"Requested photos (in batch): {len(requested_photos)}")
-            # logger.info(f"Uploaded photos (in batch): {len(uploaded_photos)}")
+            logger.info(f"Uploaded photos (in batch): {len(uploaded_photos_ids)}")
             logger.info(f"Records logged (in batch): {len(download_log_records)}")
             logger.info(f"Records iterated (in batch): {batch_size}")
             logger.info(f"Requested photos (in run): {total_requested_photos}")
