@@ -162,8 +162,8 @@ def write_download_log_to_bigquery(
 def ingest_photos_gcs(
     gcp_credential_block_name: str,
     proxy_type: Literal["datacenter", "residential"],
-    batch_size: int = 20,
-    total_record_size: int = 100,
+    batch_size: int,
+    total_record_size: int,
 ):
     """Flow to download photos from unsplash and store them in GCS"""
 
