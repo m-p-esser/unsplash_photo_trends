@@ -21,9 +21,8 @@ from src.prefect.generic_tasks import (
     parse_response,
     prepare_proxy_adresses,
     request_unsplash_api,
-    request_unsplash_napi,
 )
-from src.utils import load_env_variables, timer
+from src.utils import load_env_variables
 
 
 @flow(retries=3, retry_delay_seconds=10)  # Subflow (2nd level)
@@ -79,7 +78,6 @@ def _upload_photo_metadata_as_blob(
     timeout_seconds=120,
     task_runner=ConcurrentTaskRunner(),
 )  # Subflow (2nd level)
-@timer
 def upload_photo_metadata_to_gcs(
     response,
     response_json: list[dict],
@@ -199,7 +197,6 @@ def write_request_log_to_bigquery(
 
 
 @flow  # Main Flow (1st level)
-@timer
 def ingest_photos_napi_gcs(
     gcp_credential_block_name: str,
     per_page: int,
@@ -258,7 +255,13 @@ def ingest_photos_napi_gcs(
 
         # Actually request the data
         logger.info("Request data of interest")
-        response = request_unsplash_napi("/photos", proxies, headers, params)
+        response = request_unsplash_api(
+            endpoint="/photos",
+            proxies=proxies,
+            headers=headers,
+            params=params,
+            base_url="https://unsplash.com/napi",
+        )
         logger.info(f"Request headers: \n {pformat(dict(response.request.headers))}")
         logger.info(f"Response headers: \n {pformat(dict(response.headers))}")
 
