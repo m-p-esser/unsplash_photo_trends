@@ -7,25 +7,23 @@ from src.prefect.generic_tasks import (
     response_data_to_df,
     store_response_df_to_gcs_bucket,
 )
-from src.utils import load_env_variables, timer
+from src.utils import load_env_variables
 
 
 # Subflow
 @flow(retries=3, retry_delay_seconds=10)
-@timer
 def request_monthly_platform_stats() -> list[dict]:
     """Request monthly platform statistics (e.g. number of photos or downloads) from Unsplash API"""
 
     endpoint = "/stats/month/"
-    response_json = request_unsplash(endpoint)
+    response = request_unsplash(endpoint)
 
-    return response_json
+    return response
 
 
 @flow
-@timer
 def ingest_monthly_platform_stats_gcs():
-    """Flow to load monthly stats from Unsplash and store them in a Google Cloud Storage Bucket"""
+    """Flow to load monthly stats from unsplash and store them in a Google Cloud Storage Bucket"""
     # Call the function with the directory you want to start from
 
     response = request_monthly_platform_stats()
