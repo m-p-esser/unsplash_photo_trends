@@ -1,6 +1,7 @@
 """ Ingest actual photos (not metadata) to GCS using Download Links from Bigquery """
 
 import datetime
+import faulthandler
 from typing import Literal
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
@@ -8,7 +9,6 @@ from prefect_gcp.credentials import GcpCredentials
 
 import prefect
 from prefect import flow, get_run_logger
-from prefect.filesystems import GCS
 from prefect.task_runners import ConcurrentTaskRunner
 from src.prefect.generic_tasks import (
     create_random_ua_string,
@@ -73,7 +73,6 @@ def get_downloaded_photos_from_logs(
 @flow(
     timeout_seconds=120,
     task_runner=ConcurrentTaskRunner(),
-    result_storage=GCS(bucket_path="task-runs-prod"),
 )  # Subflow (2nd level)
 def request_photos(
     batch: list[tuple[str, str, datetime.datetime]],
@@ -105,9 +104,7 @@ def request_photos(
     return photos
 
 
-@flow(
-    timeout_seconds=120, result_storage=GCS(bucket_path="task-runs-prod")
-)  # Subflow (2nd level)
+@flow(timeout_seconds=120)  # Subflow (2nd level)
 def upload_files_to_gcs_bucket(
     photos: list[tuple],
     gcp_credential_block_name: str,
@@ -132,7 +129,7 @@ def upload_files_to_gcs_bucket(
             )
             blobs.append((photo[0], blob_name))
         except Exception as e:
-            logger.error(f"Exception occured: {e}")
+            logger.info(e)
 
     # logger.info("Finished uploading photos to GCS")
 
@@ -294,6 +291,7 @@ def ingest_photos_gcs(
 
 if __name__ == "__main__":
     # @see https://github.com/PrefectHQ/prefect/pull/8983
+    faulthandler.dump_traceback_later(60)
     ingest_photos_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         proxy_type="datacenter",
