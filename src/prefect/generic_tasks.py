@@ -85,26 +85,6 @@ def inspect_request(proxies: dict, headers: dict):
     return response.json()
 
 
-@task
-def check_zenrows_credits(zenrows_api_key: str) -> dict:
-    """Check Zenrow Credits available"""
-    response = requests.get(
-        f"https://api.zenrows.com/v1/usage?apikey={zenrows_api_key}"
-    )
-
-    response.raise_for_status()
-
-    credit_limit = int(response.json()["api_credit_limit"])
-    credits_remaining = int(response.json()["api_credit_usage"])
-    consumed_quota = (credits_remaining - credit_limit) / credit_limit
-
-    return {
-        "credit_limit": credit_limit,
-        "credits_remaining": credits_remaining,
-        "consumed_quote": consumed_quota,
-    }
-
-
 @task(retries=3, retry_delay_seconds=10)
 @timer
 def request_unsplash(
