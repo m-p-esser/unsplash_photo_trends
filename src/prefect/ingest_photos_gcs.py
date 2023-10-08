@@ -100,7 +100,12 @@ def request_photos(
     return photos
 
 
-@flow(timeout_seconds=120, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
+@flow(
+    timeout_seconds=120,
+    task_runner=ConcurrentTaskRunner(),
+    retries=3,
+    retry_delay_seconds=5,
+)  # Subflow (2nd level)
 def upload_files_to_gcs_bucket(
     photos: list[tuple],
     gcp_credential_block_name: str,

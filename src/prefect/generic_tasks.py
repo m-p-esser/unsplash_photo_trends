@@ -14,6 +14,7 @@ from google.cloud import storage
 
 from prefect import get_run_logger, task
 from prefect.blocks.system import Secret
+from prefect.tasks import task_input_hash
 from src.etl.load import upload_blob_from_file, upload_blob_from_memory
 
 
@@ -156,18 +157,20 @@ async def request_unsplash_api_async(
 
 
 @task(
-    # cache_key_fn=task_input_hash,
-    # cache_expiration=datetime.timedelta(hours=1),
+    retries=3,
+    retry_delay_seconds=3,
+    cache_key_fn=task_input_hash,
+    cache_expiration=datetime.timedelta(hours=1),
     timeout_seconds=90,
 )
-async def upload_file_to_gcs_bucket(
+def upload_file_to_gcs_bucket(
     gcp_credential_block_name: str,
     bucket_name: str,
     contents,
     file_name: str,
     file_extension: str,
     folder: str = None,
-):
+) -> storage.blob.Blob:
     logger = get_run_logger()
 
     if folder is None:
