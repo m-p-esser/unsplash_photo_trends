@@ -204,7 +204,7 @@ async def request_unsplash_napi_async(
     cache_key_fn=task_input_hash,
     cache_expiration=datetime.timedelta(hours=1),
 )
-async def upload_file_to_gcs_async(
+def upload_file_to_gcs(
     gcp_credential_block_name: str,
     bucket_name: str,
     contents,
@@ -218,13 +218,14 @@ async def upload_file_to_gcs_async(
         blob_name = f"{file_name}.{file_extension}"
     else:
         blob_name = f"{folder}/{file_name}.{file_extension}"
-    blob = await upload_blob_from_memory(
+
+    blob = upload_blob_from_memory(
         bucket_name, contents, blob_name, gcp_credential_block_name
     )
 
     logger.info(f"Uploaded {blob}: {blob_name} to {bucket_name}")
 
-    return blob
+    return blob.name
 
 
 @task(retries=3, retry_delay_seconds=10)
