@@ -2,6 +2,8 @@
 
 import datetime
 import faulthandler
+import platform
+from pprint import pformat
 from typing import Literal
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
@@ -16,7 +18,7 @@ from src.prefect.generic_tasks import (
     request_unsplash_api,
     upload_file_to_gcs_bucket,
 )
-from src.utils import load_env_variables
+from src.utils import check_system_utilization, load_env_variables
 
 
 @flow(
@@ -90,6 +92,9 @@ def request_photos(
     photos = []
 
     for photo in batch:
+        system_utilization = check_system_utilization()
+        logger.info(pformat(system_utilization))
+
         endpoint = photo[1].replace(base_url, "")  # download path
         photo_id = photo[0]
         created_at = photo[2]
@@ -99,12 +104,10 @@ def request_photos(
         )
         photos.append((photo_id, created_at, future))
 
-    # logger.info(f"Finished requesting images from Unsplash")
-
     return photos
 
 
-@flow(timeout_seconds=120)  # Subflow (2nd level)
+@flow(timeout_seconds=120, task_runner=ConcurrentTaskRunner())  # Subflow (2nd level)
 def upload_files_to_gcs_bucket(
     photos: list[tuple],
     gcp_credential_block_name: str,
@@ -118,20 +121,20 @@ def upload_files_to_gcs_bucket(
 
     blobs = []
     for photo in photos:
-        try:
-            blob_name = upload_file_to_gcs_bucket(
-                gcp_credential_block_name,
-                bucket_name,
-                photo[2],  # photo as bytes
-                photo[0],  # photo id
-                file_extension,
-                f"{photo[1].year}-{photo[1].month}",  # created at
-            )
-            blobs.append((photo[0], blob_name))
-        except Exception as e:
-            logger.info(e)
+        system_utilization = check_system_utilization()
+        logger.info(pformat(system_utilization))
 
-    # logger.info("Finished uploading photos to GCS")
+        future = upload_file_to_gcs_bucket.submit(
+            gcp_credential_block_name,
+            bucket_name,
+            photo[2],  # photo as bytes
+            photo[0],  # photo id
+            file_extension,
+            f"{photo[1].year}-{photo[1].month}",  # created at
+        )
+        blobs.append((photo[0], future))
+
+    blobs = [(b[0], b[1]) for b in blobs if b[1].get_state().is_completed()]
 
     return blobs
 
@@ -172,6 +175,7 @@ def ingest_photos_gcs(
     """Flow to download photos from unsplash and store them in Google Cloud Storage Bucket"""
 
     logger = get_run_logger()
+    logger.info(f"Platform information: \n{pformat(platform.uname()._asdict())}")
 
     # Init all variables
     env_variables = load_env_variables()
@@ -239,12 +243,14 @@ def ingest_photos_gcs(
             logger.info(f"Uploaded Photos: {blobs}")
 
             # Store all sucessfully uploaded photo ids
-            # uploaded_photos = [blob[0] for blob in blobs if blob[1].is_completed()]
             uploaded_photos_ids = [b[0] for b in blobs]
             logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
 
             # Log written records to Bigquery
             download_log_records = []
+
+            system_utilization = check_system_utilization()
+            logger.info(pformat(system_utilization))
 
             for p in requested_photos:
                 photo_id = p[0]
