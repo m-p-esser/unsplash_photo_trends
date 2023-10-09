@@ -21,10 +21,7 @@ from src.prefect.generic_tasks import (
 from src.utils import check_system_utilization, load_env_variables
 
 
-@flow(
-    retries=3,
-    retry_delay_seconds=3,
-)  # Subflow (2nd level)
+@flow(retries=3, retry_delay_seconds=5, timeout_seconds=90)  # Subflow (2nd level)
 def get_downloadable_photos_from_logs(
     gcp_credentials: GcpCredentials, env: str = "dev", location="europe-west3"
 ) -> list[tuple]:
@@ -46,10 +43,7 @@ def get_downloadable_photos_from_logs(
     return results
 
 
-@flow(
-    retries=3,
-    retry_delay_seconds=3,
-)  # Subflow (2nd level)
+@flow(retries=3, retry_delay_seconds=5, timeout_seconds=90)  # Subflow (2nd level)
 def get_downloaded_photos_from_logs(
     gcp_credentials: GcpCredentials, env: str = "dev", location="europe-west3"
 ) -> int:
