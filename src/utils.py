@@ -3,6 +3,7 @@
 import functools
 import time
 
+import psutil
 from dotenv import dotenv_values
 
 
@@ -32,3 +33,18 @@ def load_env_variables() -> dict:
     env_variables.update(environment)  # Combine both
 
     return env_variables
+
+
+def check_system_utilization():
+    """Analyze CPU and Memory Usage"""
+    vmem = psutil.virtual_memory()
+    system_utilization = {
+        "cpu_num": psutil.cpu_count(),
+        "cpu_percent": psutil.cpu_percent(interval=1),
+        "memory_full_info": {
+            "vmem_available_mb": vmem.available / (1024**2),
+            "vmem_total_mb": vmem.total / (1024**2),
+            "vmem_percent": vmem.percent,
+        },
+    }
+    return system_utilization
