@@ -159,7 +159,7 @@ def write_download_log_to_bigquery(
     return results
 
 
-@flow
+@flow(timeout_seconds=600)
 def ingest_photos_gcs(
     gcp_credential_block_name: str,
     proxy_type: Literal["datacenter", "residential"],
