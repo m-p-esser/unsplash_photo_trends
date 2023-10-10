@@ -106,9 +106,6 @@ def upload_files_to_gcs_bucket(
 
     blobs = []
     for photo in photos:
-        system_utilization = check_system_utilization()
-        logger.info(pformat(system_utilization))
-
         future = upload_file_to_gcs_bucket.submit(
             gcp_credential_block_name,
             bucket_name,
