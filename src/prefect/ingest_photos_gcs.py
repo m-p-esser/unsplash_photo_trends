@@ -1,7 +1,6 @@
 """ Ingest actual photos (not metadata) to GCS using Download Links from Bigquery """
 
 import datetime
-import faulthandler
 import platform
 from pprint import pformat
 from typing import Literal
@@ -12,13 +11,8 @@ from prefect_gcp.credentials import GcpCredentials
 import prefect
 from prefect import flow, get_run_logger
 from prefect.task_runners import ConcurrentTaskRunner
-from src.prefect.generic_tasks import (
-    create_random_ua_string,
-    prepare_proxy_adresses,
-    request_unsplash_api,
-    upload_file_to_gcs_bucket,
-)
-from src.utils import check_system_utilization, load_env_variables
+from src.prefect.generic_tasks import request_unsplash_api, upload_file_to_gcs_bucket
+from src.utils import load_env_variables
 
 
 @flow(retries=3, retry_delay_seconds=5, timeout_seconds=90)  # Subflow (2nd level)
@@ -86,9 +80,6 @@ def request_photos(
     photos = []
 
     for photo in batch:
-        system_utilization = check_system_utilization()
-        logger.info(pformat(system_utilization))
-
         endpoint = photo[1].replace(base_url, "")  # download path
         photo_id = photo[0]
         created_at = photo[2]
@@ -174,124 +165,122 @@ def ingest_photos_gcs(
     # Init all variables
     env_variables = load_env_variables()
     env = env_variables["ENV"]  # dev, test or prod
+    logger.info(f"Environment: {env}")
 
     # Init all credentials
     gcp_credentials = GcpCredentials.load(gcp_credential_block_name)
 
     # Get all downloadable photos (Bigquery)
-    downloadable_photos = get_downloadable_photos_from_logs(gcp_credentials, env)
+    get_downloadable_photos_from_logs(gcp_credentials, env)
     # Get already downloaded photos (Bigquery)
-    downloaded_photos = get_downloaded_photos_from_logs(gcp_credentials, env)
+    get_downloaded_photos_from_logs(gcp_credentials, env)
 
-    # Compare both
-    downloadable_photo_ids = [p[0] for p in downloadable_photos]
-    remaining_photo_ids = set(downloadable_photo_ids).difference(set(downloaded_photos))
+    # # Compare both
+    # downloadable_photo_ids = [p[0] for p in downloadable_photos]
+    # remaining_photo_ids = set(downloadable_photo_ids).difference(set(downloaded_photos))
 
-    # Isolate remaining photos and create a smaller subset
-    remaining_photos = [p for p in downloadable_photos if p[0] in remaining_photo_ids][
-        0:total_record_size
-    ]
-    # Split request load in batches
-    batches = [
-        remaining_photos[i : i + batch_size]
-        for i in range(0, len(remaining_photo_ids), batch_size)
-    ]
+    # # Isolate remaining photos and create a smaller subset
+    # remaining_photos = [p for p in downloadable_photos if p[0] in remaining_photo_ids][
+    #     0:total_record_size
+    # ]
+    # # Split request load in batches
+    # batches = [
+    #     remaining_photos[i : i + batch_size]
+    #     for i in range(0, len(remaining_photo_ids), batch_size)
+    # ]
 
-    if len(remaining_photo_ids) == 0:
-        logger.info(f"Job finished")
-        logger.info(f"All ({total_record_size}) photos downloaded")
+    # if len(remaining_photo_ids) == 0:
+    #     logger.info(f"Job finished")
+    #     logger.info(f"All ({total_record_size}) photos downloaded")
 
-    total_requested_photos = 0
-    total_uploaded_photos = 0
-    total_logged_records = 0
-    total_records_iterated = 0
+    # total_requested_photos = 0
+    # total_uploaded_photos = 0
+    # total_logged_records = 0
+    # total_records_iterated = 0
 
-    while len(remaining_photos) > 0 and total_records_iterated < total_record_size:
-        # Request and store photos
-        for batch in batches:
-            # Prepare Proxy and Useragent
-            proxies = prepare_proxy_adresses(proxy_type)
-            proxies["http://"] = proxies["http"]
-            proxies["https://"] = proxies["https"]
-            proxies.pop("http")
-            proxies.pop("https")
+    # while len(remaining_photos) > 0 and total_records_iterated < total_record_size:
+    #     # Request and store photos
+    #     for batch in batches:
+    #         # Prepare Proxy and Useragent
+    #         proxies = prepare_proxy_adresses(proxy_type)
+    #         proxies["http://"] = proxies["http"]
+    #         proxies["https://"] = proxies["https"]
+    #         proxies.pop("http")
+    #         proxies.pop("https")
 
-            useragent_string = create_random_ua_string()
-            logger.info(f"Will be using '{useragent_string}' to make next requests")
-            headers = {"User-Agent": useragent_string}  # Overwrite Useragent
+    #         useragent_string = create_random_ua_string()
+    #         logger.info(f"Will be using '{useragent_string}' to make next requests")
+    #         headers = {"User-Agent": useragent_string}  # Overwrite Useragent
 
-            # Async - Request photos
-            photos = request_photos(batch, proxies, headers)
-            requested_photos = [
-                (p[0], p[1], p[2].result().content, p[2].result()) for p in photos
-            ]
-            logger.info(
-                f"Requested Photos: \n{[(p[0], p[1]) for p in requested_photos]}"
-            )
+    #         # Async - Request photos
+    #         photos = request_photos(batch, proxies, headers)
+    #         requested_photos = [
+    #             (p[0], p[1], p[2].result().content, p[2].result()) for p in photos
+    #         ]
+    #         logger.info(
+    #             f"Requested Photos: \n{[(p[0], p[1]) for p in requested_photos]}"
+    #         )
 
-            # Async - Upload photos to Google Cloud Storage
-            bucket_name = f"photos-editorial-{env}"
-            blobs = upload_files_to_gcs_bucket(
-                requested_photos, gcp_credential_block_name, bucket_name, "jpg"
-            )
-            logger.info(f"Uploaded Photos: {blobs}")
+    #         # Async - Upload photos to Google Cloud Storage
+    #         bucket_name = f"photos-editorial-{env}"
+    #         blobs = upload_files_to_gcs_bucket(
+    #             requested_photos, gcp_credential_block_name, bucket_name, "jpg"
+    #         )
+    #         logger.info(f"Uploaded Photos: {blobs}")
 
-            # Store all sucessfully uploaded photo ids
-            uploaded_photos_ids = [b[0] for b in blobs]
-            logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
+    #         # Store all sucessfully uploaded photo ids
+    #         uploaded_photos_ids = [b[0] for b in blobs]
+    #         logger.info(f"Photo IDs of uploaded photos: {uploaded_photos_ids}")
 
-            # Log written records to Bigquery
-            download_log_records = []
+    #         # Log written records to Bigquery
+    #         download_log_records = []
 
-            system_utilization = check_system_utilization()
-            logger.info(pformat(system_utilization))
+    #         for p in requested_photos:
+    #             photo_id = p[0]
+    #             response = p[3]
+    #             if response.status_code == 200 and photo_id in uploaded_photos_ids:
+    #                 request_url = str(response.request.url)
+    #                 request_id = response.headers["x-imgix-id"]
 
-            for p in requested_photos:
-                photo_id = p[0]
-                response = p[3]
-                if response.status_code == 200 and photo_id in uploaded_photos_ids:
-                    request_url = str(response.request.url)
-                    request_id = response.headers["x-imgix-id"]
+    #                 download_log_record = {
+    #                     "request_id": request_id,
+    #                     "request_url": request_url,
+    #                     "photo_id": photo_id,
+    #                     "requested_at": datetime.datetime.now().strftime(
+    #                         "%Y-%m-%d %H:%M:%S"
+    #                     ),
+    #                 }
 
-                    download_log_record = {
-                        "request_id": request_id,
-                        "request_url": request_url,
-                        "photo_id": photo_id,
-                        "requested_at": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                    }
+    #                 download_log_records.append(download_log_record)
 
-                    download_log_records.append(download_log_record)
+    #         logged_records = write_download_log_to_bigquery(
+    #             gcp_credentials, download_log_records, env
+    #         )
 
-            logged_records = write_download_log_to_bigquery(
-                gcp_credentials, download_log_records, env
-            )
+    #         total_requested_photos += len(requested_photos)
+    #         total_uploaded_photos += len(uploaded_photos_ids)
+    #         total_logged_records += len(download_log_records)
+    #         total_records_iterated += batch_size
 
-            total_requested_photos += len(requested_photos)
-            total_uploaded_photos += len(uploaded_photos_ids)
-            total_logged_records += len(download_log_records)
-            total_records_iterated += batch_size
+    #         logger.info("Batch processed")
+    #         logger.info(f"Requested photos (in batch): {len(requested_photos)}")
+    #         logger.info(f"Uploaded photos (in batch): {len(uploaded_photos_ids)}")
+    #         logger.info(f"Records logged (in batch): {len(download_log_records)}")
+    #         logger.info(f"Records iterated (in batch): {batch_size}")
+    #         logger.info(f"Requested photos (in run): {total_requested_photos}")
+    #         logger.info(f"Uploaded photos (in run): {total_uploaded_photos}")
+    #         logger.info(f"Records logged (in run): {total_logged_records}")
+    #         logger.info(f"Records iterated (in run): {total_records_iterated}")
 
-            logger.info("Batch processed")
-            logger.info(f"Requested photos (in batch): {len(requested_photos)}")
-            logger.info(f"Uploaded photos (in batch): {len(uploaded_photos_ids)}")
-            logger.info(f"Records logged (in batch): {len(download_log_records)}")
-            logger.info(f"Records iterated (in batch): {batch_size}")
-            logger.info(f"Requested photos (in run): {total_requested_photos}")
-            logger.info(f"Uploaded photos (in run): {total_uploaded_photos}")
-            logger.info(f"Records logged (in run): {total_logged_records}")
-            logger.info(f"Records iterated (in run): {total_records_iterated}")
-
-            if total_records_iterated == total_record_size:
-                logger.info(f"Iterated trough all records ({total_record_size})")
-                logger.info("Job finished")
-                break
+    #         if total_records_iterated == total_record_size:
+    #             logger.info(f"Iterated trough all records ({total_record_size})")
+    #             logger.info("Job finished")
+    #             break
 
 
 if __name__ == "__main__":
     # @see https://github.com/PrefectHQ/prefect/pull/8983
-    faulthandler.dump_traceback_later(60)
+    # faulthandler.dump_traceback_later(60)
     ingest_photos_gcs(
         gcp_credential_block_name="unsplash-photo-trends-deployment-sa",
         proxy_type="datacenter",
