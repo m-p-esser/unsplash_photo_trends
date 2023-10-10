@@ -1,8 +1,6 @@
 """ Ingest actual photos (not metadata) to GCS using Download Links from Bigquery """
 
 import datetime
-import platform
-from pprint import pformat
 from typing import Literal
 
 from prefect_gcp.bigquery import bigquery_insert_stream, bigquery_query
@@ -157,7 +155,7 @@ def ingest_photos_gcs(
     """Flow to download photos from unsplash and store them in Google Cloud Storage Bucket"""
 
     logger = get_run_logger()
-    logger.info(f"Platform information: \n{pformat(platform.uname()._asdict())}")
+    # logger.info(f"Platform information: \n{pformat(platform.uname()._asdict())}")
 
     # Init all variables
     env_variables = load_env_variables()
