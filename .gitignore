@@ -95,6 +95,3 @@ src/experimental
 # requirements.txt and setup.py is only need when building a Docker image from a Dockerfile
 requirements.txt
 setup.py
-
-# Deployments
-deployments/*
