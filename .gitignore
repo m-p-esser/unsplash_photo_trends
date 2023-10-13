@@ -98,3 +98,6 @@ setup.py
 
 # Jupyter Notebooks
 notebooks/*
+
+# Deployments
+deployments/*
