@@ -54,19 +54,9 @@ deploy-ingest-monthly-platform-stats-gcs: ## Deploy Monthly Platform Stats GCS F
 		--apply
 
 .PHONY: deploy-ingest-photos-gcs
-deploy-ingest-photos-gcs: ## Deploy Ingest Photos GCS Flow as Google Cloud Run
+deploy-ingest-photos-gcs: ## Deploy Ingest Photos GCS Flow to Vertex AI
 	make env-init
-	make push-prefect-runner-image
-	prefect deployment build src/prefect/ingest_photos_gcs.py:ingest_photos_gcs \
-		--name ingest-photos-gcs-${ENV} \
-		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
-		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-photos-gcs-${ENV}-deployment.yaml \
-		--pool ${ENV}-cloud-run-push-work-pool \
-		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "proxy_type": "datacenter", "batch_size": 10, "total_record_size": 20 }' \
-		--cron "*/3 * * * *" \
-		--timezone 'Europe/Berlin' \
-		--apply
+	prefect deploy -n ingest-photos-gcs-${ENV}
 
 .PHONY: deploy-ingest-photos-napi-gcs
 deploy-ingest-photos-napi-gcs: ## Deploy Ingest Photos NAPI GCS Flow as Google Cloud Run
