@@ -204,13 +204,13 @@ def ingest_photos_napi_gcs(
 ):
     """Flow to load Editorial photos from Unsplash and store them in a Google Cloud Storage Bucket"""
 
+    logger = get_run_logger()
+
     import pathlib
 
     path = pathlib.Path.cwd()
     for p in path.rglob("*"):
-        logger.info(p.name)
-
-    logger = get_run_logger()
+        logger.info(p)
 
     # Init all variables
     env_variables = load_env_variables()
