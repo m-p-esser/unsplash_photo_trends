@@ -21,21 +21,6 @@ deploy-flow: ## Deploy any flow
 	python src/scripts/create_env_variable.py
 	prefect deploy
 
-.PHONY: deploy-ingest-photos-napi-gcs
-deploy-ingest-photos-napi-gcs: ## Deploy Ingest Photos NAPI GCS Flow as Google Cloud Run
-	make env-init
-	make push-prefect-runner-image
-	prefect deployment build src/prefect/ingest_photos_napi_gcs.py:ingest_photos_napi_gcs \
-		--name ingest-photos-napi-gcs-${ENV} \
-		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
-		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-photos-napi-gcs-${ENV}-deployment.yaml \
-		--pool ${ENV}-cloud-run-push-work-pool \
-		--params='{"gcp_credential_block_name": "unsplash-photo-trends-deployment-sa", "per_page": 30, "proxy_type": "datacenter" }' \
-		--cron "*/10 * * * *" \
-		--timezone 'Europe/Berlin' \
-		--apply
-
 .PHONY: deploy-ingest-photos-expanded-napi-bigquery
 deploy-ingest-photos-expanded-napi-bigquery: ## Deploy Ingest Photos expanded NAPI bigquery Flow as Google Cloud Run
 	make env-init
