@@ -18,6 +18,7 @@ deployment-preperations: ## Preperation steps before deploying
 .PHONY: deploy-flow
 deploy-flow: ## Deploy any flow
 	make deployment-preperations
+	python src/scripts/create_env_variable.py
 	prefect deploy
 
 .PHONY: deploy-ingest-photos-napi-gcs
