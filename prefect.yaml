@@ -144,3 +144,14 @@ deployments:
       proxy_type: datacenter
       batch_size: 30
       total_record_size: 180
+  - name: "ingest-photos-gcs-prod"
+    entrypoint: src/prefect/ingest_photos_gcs.py:ingest_photos_gcs
+    work_pool: *prod_cloud_run_work_pool
+    schedule:
+      cron: "*/6 * * * *" # every N min
+      timezone: "Europe/Berlin"
+    parameters:
+      gcp_credential_block_name: unsplash-photo-trends-deployment-sa
+      proxy_type: datacenter
+      batch_size: 20
+      total_record_size: 40
