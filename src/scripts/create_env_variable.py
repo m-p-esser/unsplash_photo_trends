@@ -3,7 +3,7 @@
 from prefect import settings
 from src.scripts.create_variables import (
     create_prefect_variable,
-    update_prefect_variable_by_name,
+    delete_prefect_variable_by_name,
 )
 from src.utils import load_env_variables
 
@@ -29,13 +29,19 @@ def create_env_string_variable():
     print(f"Status Reason: {response.reason}")
     print(response.content)
 
-    # If Variable name exists, update instead (as a Variable name needs to be unique)
+    # If Variable name exists, delete and recreate (as a Variable name needs to be unique)
     if response.status_code == 409:
-        response = update_prefect_variable_by_name(
+        response = delete_prefect_variable_by_name(
             variable_name=data["name"],
-            data=data,
             api_url=PREFECT_API_URL,
             api_key=PREFECT_API_KEY,
+        )
+        print(f"Status Code: {response.status_code}")
+        print(f"Status Reason: {response.reason}")
+        print(response.content)
+
+        response = create_prefect_variable(
+            data=data, api_url=PREFECT_API_URL, api_key=PREFECT_API_KEY
         )
         print(f"Status Code: {response.status_code}")
         print(f"Status Reason: {response.reason}")

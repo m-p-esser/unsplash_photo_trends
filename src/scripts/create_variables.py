@@ -32,7 +32,7 @@ def create_prefect_variable(data: dict, api_url: str, api_key: str):
 def delete_prefect_variable_by_name(variable_name: str, api_url: str, api_key: str):
     """Delete Prefect Variable using Prefect REST Endpoint"""
     headers = {"Authorization": f"Bearer {api_key}"}
-    endpoint = f"{api_url}/variables/name/{variable_name}"
+    endpoint = f"{api_url}/variables/name/{variable_name}/"
 
     response = requests.delete(url=endpoint, headers=headers)
     return response
@@ -43,9 +43,9 @@ def update_prefect_variable_by_name(
 ):
     """Update Prefect Variable using Prefect REST Endpoint"""
     headers = {"Authorization": f"Bearer {api_key}"}
-    endpoint = f"{api_url}/variables/name/{variable_name}"
+    endpoint = f"{api_url}/variables/name/{variable_name}/"
 
-    response = requests.patch(url=endpoint, json=data, headers=headers)
+    response = requests.patch(url=endpoint, headers=headers, json=data)
     return response
 
 
@@ -53,13 +53,24 @@ if __name__ == "__main__":
     for k, v in insensitive_env_vars.items():
         data = {"name": k.lower(), "value": str(v)}
         response = create_prefect_variable(data, PREFECT_API_URL, PREFECT_API_KEY)
-
-        # If Variable name exists, update instead (as a Variable name needs to be unique)
-        if response.status_code == 409:
-            response = update_prefect_variable_by_name(
-                data["name"], PREFECT_API_URL, PREFECT_API_KEY
-            )
-
         print(f"Status Code: {response.status_code}")
         print(f"Status Reason: {response.reason}")
         print(response.content)
+
+        # If Variable name exists, delete and recreate (as a Variable name needs to be unique)
+        if response.status_code == 409:
+            response = delete_prefect_variable_by_name(
+                variable_name=data["name"],
+                api_url=PREFECT_API_URL,
+                api_key=PREFECT_API_KEY,
+            )
+            print(f"Status Code: {response.status_code}")
+            print(f"Status Reason: {response.reason}")
+            print(response.content)
+
+            response = create_prefect_variable(
+                data=data, api_url=PREFECT_API_URL, api_key=PREFECT_API_KEY
+            )
+            print(f"Status Code: {response.status_code}")
+            print(f"Status Reason: {response.reason}")
+            print(response.content)
