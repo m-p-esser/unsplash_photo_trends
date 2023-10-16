@@ -30,7 +30,6 @@ This Project is about collecting Photo metadata from the Unsplash Photo Platform
 │   └── images
 ├── images           --> Docker Images (which are used across flows)
 ├── make             --> Makefiles for setting up ressources and environment
-├── notebooks        --> Jupyter or Observeable (JS) Notebooks
 ├── output           --> Deliverables in form of reports or models
 │   ├── models
 │   └── reports
@@ -39,12 +38,15 @@ This Project is about collecting Photo metadata from the Unsplash Photo Platform
 │   ├── blocks       --> Prefect Blocks
 │   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
 │   ├── prefect      --> Prefect Flows
-│   └── scripts      --> Python utility scripts
+│   └── scripts      --> Python and Bash utility scripts
 ├── tests            --> Unit tests
 ```
 
-## Most important files
-prefect.yaml -> Deployment steps and configuration
+## Most important files on root level
+`.pre-commit-config.yaml`: Pre-commit hooks which are run before each commit
+`prefect.yaml`: Deployment steps and configuration
+`Makefile`: Settings for Makefile (which are stored in folder `make/*`)
+`pyproject.toml` & `poetry.lock`: Python dependencies 
 
 ## Setup
 
@@ -97,6 +99,7 @@ Start on `develop`
 Move on to `test`
 - Merge with `develop`
 - Run Integration Tests (ensures that the Docker image is updated in Artifact Registry) which also deploys the flow
+- Deploy Flow by runng `make deploy-flow`
 - Sync with Bigquery (using existing Flow)
 
 Move on `prod`
