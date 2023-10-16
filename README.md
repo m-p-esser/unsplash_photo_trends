@@ -1,12 +1,49 @@
 # Unsplash Photo Trends
 
-![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png):
+![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png)
 
 ## What is this Project about?
 
-This Project is about collecting Photo metadata from the Unsplash Photo Platform. Unsplash offers photos for download under a free licensing model.
+This Project is a Data Enginering Project about collecting Photo metadata and actual photos from the Unsplash Photo Platform. Unsplash offers photos for download under a free licensing model.
+
+The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and Google Cloud Storage and Google BigQuery as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough Google Cloud Runs.
+
+## Statistics
+- XXX.XXX Photos
+- XXX.XXX Metadata about Photos
+  - including Views, Likes, Downloads, EXIF, Location
+
+## Data Pipeline
+The Data Pipeline consist of 5 different Flows (Jobs)
+
+![Deployments](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/deployments.png)
+
+### Pipeline Design
+- [ ] Add Obsidian Canvas here
+
+## Technology 
+
+**Storage**
+- Google Cloud Storage
+- Google BigQuery
+
+**Compute**
+- Google Cloud Run
+
+**Orchestration**
+- [Prefect](https://www.prefect.io/)
+
+**Languages**
+- Python
+- Bash
+- SQL
 
 ## Prerequisites
+
+If you want to reproduce some of this code or copy and paste parts of it. Feel free to do so.
+
+If you want to build on this projects, here are the prerequisites
+
 - A Google account (to create ressources in GCP)
 - A Prefect account (with access to the Prefect Cloud)
 - Expects the following Git branches. See [Git Branching Strategy](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/Data_Engineering_Git_Branching_Strategy.png):
@@ -15,6 +52,8 @@ This Project is about collecting Photo metadata from the Unsplash Photo Platform
   - test 
 
 ## Folder structure
+
+These are the main folders (and their their descrptions) of this Github repo. In case some folders are not visible, then they are not meant to be shared (see `.gitignore`) 
 
 *hint: `tree -L 2 -d -A`* 
 
@@ -43,10 +82,11 @@ This Project is about collecting Photo metadata from the Unsplash Photo Platform
 ```
 
 ## Most important files on root level
-`.pre-commit-config.yaml`: Pre-commit hooks which are run before each commit
-`prefect.yaml`: Deployment steps and configuration
-`Makefile`: Settings for Makefile (which are stored in folder `make/*`)
-`pyproject.toml` & `poetry.lock`: Python dependencies 
+
+- `prefect.yaml`: Deployment steps and configuration
+- `.pre-commit-config.yaml`: Pre-commit hooks which are run before each commit
+- `Makefile`: Settings for Makefile (which are stored in folder `make/*`)
+- `pyproject.toml` & `poetry.lock`: Python dependencies 
 
 ## Setup
 
@@ -55,12 +95,12 @@ Install Pre-commit hooks (for code formatting, import statement checks before co
 - `pre-commit install`
 
 ### Environment Variables
-Define values in base.env (not part of this repository)
+Define values in `base.env` (not part of this repository)
 
 ### Github Action Secrets
 Add the following Secrets as Action secrets to your Github repository: 
-- PREFECT_API_KEY
-- PREFECT_API_URL
+- `PREFECT_API_KEY`
+- `PREFECT_API_URL`
 
 See https://docs.prefect.io/latest/api-ref/rest-api/#finding-your-prefect-cloud-details
 
@@ -99,10 +139,11 @@ Start on `develop`
 
 Move on to `test`
 - Merge with `develop`
-- Run Integration Tests (ensures that the Docker image is updated in Artifact Registry) which also deploys the flow
 - Deploy Flow by running `make deploy-flow`
-- Sync with Bigquery (using existing Flow)
+- Run integration test trough a manual Flow run
+- Sync with Bigquery (using existing Flow if you want to sync GCS and Bigquery using a Push pattern)
 
 Move on `prod`
-- Repeat the steps from `test`
+- Merge with `test`
+- Deploy Flow by running `make deploy-flow`
 
