@@ -82,7 +82,7 @@ deployments:
     entrypoint: src/prefect/ingest_photos_napi_gcs.py:ingest_photos_napi_gcs
     work_pool: *test_cloud_run_work_pool
     schedule:
-      cron: "*/10 * * * *" # every 10 min
+      cron: "*/10 * * * *" # every N min
       timezone: "Europe/Berlin"
     parameters:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
@@ -109,7 +109,7 @@ deployments:
     entrypoint: src/prefect/ingest_photos_napi_gcs.py:ingest_photos_napi_gcs
     work_pool: *prod_cloud_run_work_pool
     schedule:
-      cron: "*/10 * * * *" # every 10 min
+      cron: "*/60 * * * *" # every N min
       timezone: "Europe/Berlin"
     parameters:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
