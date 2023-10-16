@@ -79,6 +79,7 @@ If this doesn't work, run the commands from `01_setup_gcp.mk` command by command
 
 ### Environment Setup
 *necessary everytime you start working on the project*
+- `make env-init` to prepare ENV environment variable
 - `make dev-init` to setup development environment
 
 ### Prefect Setup

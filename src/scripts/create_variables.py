@@ -1,8 +1,6 @@
 """ Programmatically store selected, insensitive Environment Variables 
 as Prefect Variables"""
 
-from pprint import pformat
-
 import requests
 
 from prefect import settings
@@ -31,8 +29,37 @@ def create_prefect_variable(data: dict, api_url: str, api_key: str):
     return response
 
 
+def delete_prefect_variable_by_name(variable_name: str, api_url: str, api_key: str):
+    """Delete Prefect Variable using Prefect REST Endpoint"""
+    headers = {"Authorization": f"Bearer {api_key}"}
+    endpoint = f"{api_url}/variables/name/{variable_name}"
+
+    response = requests.delete(url=endpoint, headers=headers)
+    return response
+
+
+def update_prefect_variable_by_name(
+    variable_name: str, data: dict, api_url: str, api_key: str
+):
+    """Update Prefect Variable using Prefect REST Endpoint"""
+    headers = {"Authorization": f"Bearer {api_key}"}
+    endpoint = f"{api_url}/variables/name/{variable_name}"
+
+    response = requests.patch(url=endpoint, json=data, headers=headers)
+    return response
+
+
 if __name__ == "__main__":
     for k, v in insensitive_env_vars.items():
         data = {"name": k.lower(), "value": str(v)}
         response = create_prefect_variable(data, PREFECT_API_URL, PREFECT_API_KEY)
-        print(pformat(response.json()))
+
+        # If Variable name exists, update instead (as a Variable name needs to be unique)
+        if response.status_code == 409:
+            response = update_prefect_variable_by_name(
+                data["name"], PREFECT_API_URL, PREFECT_API_KEY
+            )
+
+        print(f"Status Code: {response.status_code}")
+        print(f"Status Reason: {response.reason}")
+        print(response.content)
