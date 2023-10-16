@@ -148,7 +148,7 @@ deployments:
     entrypoint: src/prefect/ingest_photos_gcs.py:ingest_photos_gcs
     work_pool: *prod_cloud_run_work_pool
     schedule:
-      cron: "*/6 * * * *" # every N min
+      cron: "*/4 * * * *" # every N min
       timezone: "Europe/Berlin"
     parameters:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
