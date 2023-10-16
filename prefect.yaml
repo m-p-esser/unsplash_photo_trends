@@ -88,6 +88,15 @@ deployments:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
       per_page: 30
       proxy_type: datacenter
+  - name: "ingest-photos-expanded-napi-bigquery-test"
+    entrypoint: src/prefect/ingest_photos_expanded_napi_bigquery.py:ingest_photos_expanded_napi_bigquery
+    work_pool: *test_cloud_run_work_pool
+    schedule: null
+    parameters:
+      gcp_credential_block_name: unsplash-photo-trends-deployment-sa
+      proxy_type: datacenter
+      batch_size: 30
+      total_record_size: 60
   # Production Environment
   - name: "healthcheck-prod"
     entrypoint: src/prefect/healthcheck.py:healthcheck
@@ -115,3 +124,14 @@ deployments:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
       per_page: 30
       proxy_type: datacenter
+  - name: "ingest-photos-expanded-napi-bigquery-prod"
+    entrypoint: src/prefect/ingest_photos_expanded_napi_bigquery.py:ingest_photos_expanded_napi_bigquery
+    work_pool: *pro_cloud_run_work_pool
+    schedule:
+      cron: "*/6 * * * *" # every N min
+      timezone: "Europe/Berlin"
+    parameters:
+      gcp_credential_block_name: unsplash-photo-trends-deployment-sa
+      proxy_type: datacenter
+      batch_size: 30
+      total_record_size: 60
