@@ -4,7 +4,7 @@
 
 ## What is this Project about?
 
-Ever wondered **which** type of **photos are downloaded most often**? Look no further. This project aims to deliver those answers. 
+Ever wondered **which** type of **photos are downloaded most often**? Look no further. This project aims to deliver the answer to this question. 
 
 This Project is a <u>**Data Enginering Project**</u> about **collecting photo metadata** and actual **photos** from the **Unsplash Photo Platform**. Unsplash offers photos for download under a free licensing model.
 
