@@ -206,15 +206,8 @@ def ingest_photos_napi_gcs(
 
     logger = get_run_logger()
 
-    import pathlib
-
-    path = pathlib.Path.cwd()
-    for p in path.rglob("*"):
-        logger.info(p)
-
     # Init all variables
     env_variables = load_env_variables()
-    logger.info(env_variables)
     env = env_variables["ENV"]  # dev, test or prod
     bucket_name = f"photos-editorial-metadata-{env}"
 
