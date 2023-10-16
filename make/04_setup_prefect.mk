@@ -3,6 +3,8 @@
 .PHONY: set-prefect-env-variarables
 set-prefect-env-variarables: ## Set Environment variables for Prefect
 	prefect config set PREFECT_LOGGING_EXTRA_LOGGERS=${PREFECT_LOGGING_EXTRA_LOGGERS}
+	prefect config set PREFECT_API_URL=${PREFECT_API_URL}
+	prefect config set PREFECT_API_KEY=${PREFECT_API_KEY}
 
 .PHONY: create-prefect-blocks
 create-prefect-blocks: ## Create Prefect Blocks
