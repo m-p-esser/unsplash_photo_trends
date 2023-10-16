@@ -1,0 +1,76 @@
+# Secrets
+**/*.env*
+!make/.env
+!make/base.env
+.idea
+.phpunit.result.cache
+vendor/
+secret.gpg
+.gitsecret/keys/random_seed
+.gitsecret/keys/pubring.kbx~
+.secrets/*/*
+.secrets
+!**/*.secret
+gcp-service-account-key.json
+gcp-master-service-account-key.json
+**/variables.env
+
+# prefect artifacts
+.prefectignore
+
+# python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+
+# Data
+data/
+
+# Settings
+.vscode
+
+# Type checking artifacts
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# IPython
+profile_default/
+ipython_config.py
+*.ipynb_checkpoints/*
+
+# Environments
+.python-version
+.venv
+env/
+venv/
+
+# MacOS
+.DS_Store
+
+# Dask
+dask-worker-space/
+
+# Editors
+.idea/
+.vscode/
+
+# VCS
+.git/*
+.git
+.hg/
+
+# Setup files
+common_crawl.egg-info
+
+# Experimental files to try new Python functionality
+src/experimental
+
+# Jupyter Notebooks
+notebooks/*
+
+# Deployments
+deployments/*
