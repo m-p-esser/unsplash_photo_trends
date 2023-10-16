@@ -8,45 +8,48 @@ prefect-version: "{{ prefect.variables.prefect_version }}"
 
 # build section allows you to manage and build docker images
 build:
-    - prefect.deployments.steps.run_shell_script:
-        id: get-env
-        script: "bash env_init.sh"
-        directory: src/scripts
     - prefect_docker.deployments.steps.build_docker_image:
-        id: build-image
-        requires: prefect-docker>=0.3.1
-        dockerfile: auto
-        image_name: "{{ prefect.variables.gcp_default_region }}-docker.pkg.dev/{{ prefect.variables.gcp_project_id }}/prefect-{{ get-env.stdout }}/prefect"
-        tag: "{{ prefect.variables.prefect_version }}-python{{ prefect.variables.python_version }}"
+          id: build-image
+          requires: prefect-docker>=0.3.1
+          dockerfile: auto
+          image_name: "{{ prefect.variables.gcp_default_region }}-docker.pkg.dev/{{ prefect.variables.gcp_project_id }}/prefect-{{ prefect.variables.unsplash_photo_trends_env }}/prefect"
+          tag: "{{ prefect.variables.prefect_version }}-python{{ prefect.variables.python_version }}"
 
 # push section allows you to manage if and how this project is uploaded to remote locations
 push:
     - prefect_docker.deployments.steps.push_docker_image:
-        requires: prefect-docker>=0.3.1
-        image_name: "{{ build-image.image_name }}"
-        tag: "{{ build-image.tag }}"
+          requires: prefect-docker>=0.3.1
+          image_name: "{{ build-image.image_name }}"
+          tag: "{{ build-image.tag }}"
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
     - prefect.deployments.steps.set_working_directory:
-        directory: "/opt/prefect/{{ prefect.variables.gcp_project_id }}"
+          id: set-working-directory
+          directory: "/opt/prefect/{{ prefect.variables.gcp_project_id }}"
+    - prefect.deployments.steps.git_clone:
+          id: git-clone
+          repository: "{{ prefect.variables.github_repo }}"
+          branch: git symbolic-ref --short HEAD
     - prefect.deployments.steps.pip_install_requirements:
-        requirements_file: requirements.txt
+          id: pip-install-requirements
+          requirements_file: requirements.txt
+          stream_output: true
 
 # @see https://docs.prefect.io/2.13.7/guides/prefect-deploy/?h=prefect.yaml#reusing-configuration-across-deployments
 definitions:
     work_pools:
-        dev-cloud_run_work_pool: &dev_cloud_run_work_pool 
+        dev-cloud_run_work_pool: &dev_cloud_run_work_pool
             name: "dev-cloud-run-push-work-pool"
             work_queue_name: null
             job_variables:
                 image: "{{ build-image.image }}"
-        test-cloud_run_work_pool: &test_cloud_run_work_pool 
+        test-cloud_run_work_pool: &test_cloud_run_work_pool
             name: "test-cloud-run-push-work-pool"
             work_queue_name: null
             job_variables:
                 image: "{{ build-image.image }}"
-        prod-cloud_run_work_pool: &prod_cloud_run_work_pool 
+        prod-cloud_run_work_pool: &prod_cloud_run_work_pool
             name: "prod-cloud-run-push-work-pool"
             work_queue_name: null
             job_variables:
@@ -62,11 +65,11 @@ deployments:
       entrypoint: src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs
       work_pool: *test_cloud_run_work_pool
       schedule:
-        cron: "0 8 * * *"
-        timezone: 'Europe/Berlin'
+          cron: "0 8 * * *"
+          timezone: "Europe/Berlin"
     - name: "ingest-topics-gcs-test"
       entrypoint: src/prefect/ingest_topics_gcs.py:ingest_topics_gcs
       work_pool: *test_cloud_run_work_pool
       schedule:
-        cron: "0 9 * * *"
-        timezone: 'Europe/Berlin'
+          cron: "0 9 * * *"
+          timezone: "Europe/Berlin"
