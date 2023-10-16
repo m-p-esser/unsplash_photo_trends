@@ -31,10 +31,10 @@ pull:
   - prefect.deployments.steps.set_working_directory:
       id: set-working-directory
       directory: "/opt/prefect/{{ prefect.variables.gcp_project_id }}"
-  - prefect.deployments.steps.git_clone:
-      id: git-clone
-      repository: "{{ prefect.variables.github_repo }}"
-      branch: "{{ get-git-branch.stdout }}"
+  # - prefect.deployments.steps.git_clone:
+  #     id: git-clone
+  #     repository: "{{ prefect.variables.github_repo }}"
+  #     branch: "{{ get-git-branch.stdout }}"
   - prefect.deployments.steps.pip_install_requirements:
       id: pip-install-requirements
       requirements_file: requirements.txt
