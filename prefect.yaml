@@ -4,41 +4,69 @@
 
 # Generic metadata about this project
 name: unsplash-photo-trends
-prefect-version: 2.13.0
+prefect-version: "{{ prefect.variables.prefect_version }}"
 
 # build section allows you to manage and build docker images
 build:
-- prefect_docker.deployments.steps.build_docker_image:
-    requires: prefect-docker>=0.3.1
-    id: build-image
-    dockerfile: auto
-    image_name: europe-west3-docker.pkg.dev/unsplash-photo-trends/prefect-test/prefect
-    tag: 2.13.0-python3.10
+    - prefect.deployments.steps.run_shell_script:
+        id: get-env
+        script: "bash env_init.sh"
+        directory: src/scripts
+    - prefect_docker.deployments.steps.build_docker_image:
+        id: build-image
+        requires: prefect-docker>=0.3.1
+        dockerfile: auto
+        image_name: "{{ prefect.variables.gcp_default_region }}-docker.pkg.dev/{{ prefect.variables.gcp_project_id }}/prefect-{{ get-env.stdout }}/prefect"
+        tag: "{{ prefect.variables.prefect_version }}-python{{ prefect.variables.python_version }}"
 
 # push section allows you to manage if and how this project is uploaded to remote locations
 push:
-- prefect_docker.deployments.steps.push_docker_image:
-    requires: prefect-docker>=0.3.1
-    image_name: '{{ build-image.image_name }}'
-    tag: '{{ build-image.tag }}'
+    - prefect_docker.deployments.steps.push_docker_image:
+        requires: prefect-docker>=0.3.1
+        image_name: "{{ build-image.image_name }}"
+        tag: "{{ build-image.tag }}"
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
-- prefect.deployments.steps.set_working_directory:
-    directory: /opt/prefect/unsplash-photo-trends
+    - prefect.deployments.steps.set_working_directory:
+        directory: "/opt/prefect/{{ prefect.variables.gcp_project_id }}"
+    - prefect.deployments.steps.pip_install_requirements:
+        requirements_file: requirements.txt
+
+# @see https://docs.prefect.io/2.13.7/guides/prefect-deploy/?h=prefect.yaml#reusing-configuration-across-deployments
+definitions:
+    work_pools:
+        dev-cloud_run_work_pool: &dev_cloud_run_work_pool 
+            name: "dev-cloud-run-push-work-pool"
+            work_queue_name: null
+            job_variables:
+                image: "{{ build-image.image }}"
+        test-cloud_run_work_pool: &test_cloud_run_work_pool 
+            name: "test-cloud-run-push-work-pool"
+            work_queue_name: null
+            job_variables:
+                image: "{{ build-image.image }}"
+        prod-cloud_run_work_pool: &prod_cloud_run_work_pool 
+            name: "prod-cloud-run-push-work-pool"
+            work_queue_name: null
+            job_variables:
+                image: "{{ build-image.image }}"
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: ingest-photos-gcs-test
-  version: null
-  tags: []
-  description: Flow to download photos from unsplash and store them in Google Cloud
-    Storage Bucket
-  entrypoint: src/prefect/ingest_photos_gcs.py:ingest_photos_gcs
-  parameters: {}
-  work_pool:
-    name: test-docker-container-pool
-    work_queue_name: null
-    job_variables:
-      image: '{{ build-image.image }}'
-  schedule: null
+    - name: "healthcheck-test"
+      entrypoint: src/prefect/healthcheck.py:healthcheck
+      work_pool: *test_cloud_run_work_pool
+      schedule: null
+    - name: "ingest-monthly-platform-stats-gcs-test"
+      entrypoint: src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs
+      work_pool: *test_cloud_run_work_pool
+      schedule:
+        cron: "0 8 * * *"
+        timezone: 'Europe/Berlin'
+    - name: "ingest-topics-gcs-test"
+      entrypoint: src/prefect/ingest_topics_gcs.py:ingest_topics_gcs
+      work_pool: *test_cloud_run_work_pool
+      schedule:
+        cron: "0 9 * * *"
+        timezone: 'Europe/Berlin'

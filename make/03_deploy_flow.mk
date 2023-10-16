@@ -10,53 +10,15 @@ push-prefect-runner-image: ## Deploy Prefect Runner Image (generic Prefect image
 		-f images/prefect_runner/Dockerfile .
 	docker push $(GCP_DEFAULT_REGION)-docker.pkg.dev/$(GCP_PROJECT_ID)/prefect-${ENV}/prefect:$(PREFECT_VERSION)-python$(PYTHON_VERSION)
 
-# @see https://crontab.guru/ for how to write cron expressions
-.PHONY: deploy-ingest-topics-gcs
-deploy-ingest-topics-gcs: ## Deploy Ingest Topic GCS Flow as Google Cloud Run
+.PHONY: deployment-preperations
+deployment-preperations: ## Preperation steps before deploying
 	make env-init
-	make push-prefect-runner-image
-	prefect deployment build src/prefect/ingest_topics_gcs.py:ingest_topics_gcs \
-		--name ingest-topics-gcs-${ENV} \
-		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
-		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-topics-gcs-${ENV}-deployment.yaml \
-		--pool ${ENV}-cloud-run-push-work-pool \
-		--cron "0 9 * * *" \
-		--timezone 'Europe/Berlin' \
-		--apply
+	poetry export -o requirements.txt --without-hashes --without-urls --without=dev,test
 
-.PHONY: deploy-healthcheck
-deploy-healthcheck: ## Deploy Healtcheck Flow as Google Cloud Run
-	make env-init
-	make push-prefect-runner-image
-	prefect deployment build src/prefect/healthcheck.py:healthcheck \
-		--name healthcheck-${ENV} \
-		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
-		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/healthcheck-${ENV}-deployment.yaml \
-		--pool ${ENV}-cloud-run-push-work-pool \
-		--cron "0 8 * * *" \
-		--timezone 'Europe/Berlin' \
-		--apply
-
-.PHONY: deploy-ingest-monthly-platform-stats-gcs
-deploy-ingest-monthly-platform-stats-gcs: ## Deploy Monthly Platform Stats GCS Flow as Google Cloud Run
-	make env-init
-	make push-prefect-runner-image
-	prefect deployment build src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs \
-		--name ingest-monthly-platform-stats-gcs-${ENV} \
-		--infra-block cloud-run-job/${GCP_PROJECT_ID}-google-cloud-run-${ENV} \
-		--storage-block github/${GCP_PROJECT_ID}-github-${ENV} \
-		--output deployments/ingest-monthly-platform-stats-gcs-${ENV}-deployment.yaml \
-		--pool ${ENV}-cloud-run-push-work-pool \
-		--cron "0 8 * * *" \
-		--timezone 'Europe/Berlin' \
-		--apply
-
-.PHONY: deploy-ingest-photos-gcs
-deploy-ingest-photos-gcs: ## Deploy Ingest Photos GCS Flow to Vertex AI
-	make env-init
-	prefect deploy -n ingest-photos-gcs-${ENV}
+.PHONY: deploy-flow
+deploy-flow: ## Deploy any flow
+	make deployment-preperations
+	prefect deploy
 
 .PHONY: deploy-ingest-photos-napi-gcs
 deploy-ingest-photos-napi-gcs: ## Deploy Ingest Photos NAPI GCS Flow as Google Cloud Run
