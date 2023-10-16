@@ -134,4 +134,4 @@ deployments:
       gcp_credential_block_name: unsplash-photo-trends-deployment-sa
       proxy_type: datacenter
       batch_size: 30
-      total_record_size: 60
+      total_record_size: 180
