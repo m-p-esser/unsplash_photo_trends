@@ -1,6 +1,6 @@
 # Unsplash Photo Trends
 
-![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash-photo-trends/blob/master/docs/images/unsplash_cover_image.png):
+![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png):
 
 ## What is this Project about?
 
@@ -9,7 +9,7 @@ This Project is about collecting Photo metadata from the Unsplash Photo Platform
 ## Prerequisites
 - A Google account (to create ressources in GCP)
 - A Prefect account (with access to the Prefect Cloud)
-- Expects the following Git branches. See [Git Branching Strategy](https://github.com/m-p-esser/unsplash-photo-trends/blob/master/docs/images/Data_Engineering_Git_Branching_Strategy.png):
+- Expects the following Git branches. See [Git Branching Strategy](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/Data_Engineering_Git_Branching_Strategy.png):
   - master
   - develop
   - test 
