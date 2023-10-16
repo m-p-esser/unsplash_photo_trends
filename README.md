@@ -24,11 +24,11 @@ The Data Pipeline consist of 5 different Flows (Jobs)
 ## Technology 
 
 **Storage**
-- Google Cloud Storage
-- Google BigQuery
+- [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
+- [Google BigQuery](https://cloud.google.com/bigquery?hl=en)
 
 **Compute**
-- Google Cloud Run
+- [Google Cloud Run](https://cloud.google.com/run?hl=en)
 
 **Orchestration**
 - [Prefect](https://www.prefect.io/)
@@ -40,7 +40,7 @@ The Data Pipeline consist of 5 different Flows (Jobs)
 
 ## Prerequisites
 
-If you want to reproduce some of this code or copy and paste parts of it. Feel free to do so.
+If you want to reproduce some of this code or copy and paste parts of it, feel free to do so.
 
 If you want to build on this projects, here are the prerequisites
 
@@ -64,9 +64,8 @@ These are the main folders (and their their descrptions) of this Github repo. In
 │   ├── 00_raw       --> Immutable, raw data
 │   ├── 01_staged    --> Processed data
 │   └── 02_final     --> Data which can be served (ML, Analytics)
-├── deployments      --> Prefect deployment .yaml files
 ├── docs
-│   └── images
+│   └── images       --> Images used in this Readme.md
 ├── images           --> Docker Images (which are used across flows)
 ├── make             --> Makefiles for setting up ressources and environment
 ├── output           --> Deliverables in form of reports or models
@@ -75,7 +74,7 @@ These are the main folders (and their their descrptions) of this Github repo. In
 ├── references       --> Data dictionaries, manuals, and all other explanatory materials
 ├── src              --> Source code (Python)
 │   ├── blocks       --> Prefect Blocks
-│   ├── etl          --> Collection of common Extraction, Transformation and Loading functions
+│   ├── etl          --> Collection of common Extraction, Transformation and Loading functions used
 │   ├── prefect      --> Prefect Flows
 │   └── scripts      --> Python and Bash utility scripts
 ├── tests            --> Unit tests
@@ -96,6 +95,7 @@ Install Pre-commit hooks (for code formatting, import statement checks before co
 
 ### Environment Variables
 Define values in `base.env` (not part of this repository)
+For reference check `base.env.example` which contains all major variables required for this project
 
 ### Github Action Secrets
 Add the following Secrets as Action secrets to your Github repository: 
