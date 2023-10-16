@@ -54,6 +54,7 @@ definitions:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
+    # Test Environment
     - name: "healthcheck-test"
       entrypoint: src/prefect/healthcheck.py:healthcheck
       work_pool: *test_cloud_run_work_pool
@@ -67,6 +68,23 @@ deployments:
     - name: "ingest-topics-gcs-test"
       entrypoint: src/prefect/ingest_topics_gcs.py:ingest_topics_gcs
       work_pool: *test_cloud_run_work_pool
+      schedule:
+        cron: "0 9 * * *"
+        timezone: 'Europe/Berlin'
+    # Production Environment
+    - name: "healthcheck-prod"
+      entrypoint: src/prefect/healthcheck.py:healthcheck
+      work_pool: *prod_cloud_run_work_pool
+      schedule: null
+    - name: "   "
+      entrypoint: src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs
+      work_pool: *prod_cloud_run_work_pool
+      schedule:
+        cron: "0 8 * * *"
+        timezone: 'Europe/Berlin'
+    - name: "ingest-topics-gcs-prod"
+      entrypoint: src/prefect/ingest_topics_gcs.py:ingest_topics_gcs
+      work_pool: *prod_cloud_run_work_pool
       schedule:
         cron: "0 9 * * *"
         timezone: 'Europe/Berlin'
