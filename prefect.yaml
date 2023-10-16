@@ -24,13 +24,17 @@ push:
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
+    - prefect.deployments.steps.utility.run_shell_script:
+          id: get-git-branch
+          script: git symbolic-ref --short HEAD
+          stream_output: true
     - prefect.deployments.steps.set_working_directory:
           id: set-working-directory
           directory: "/opt/prefect/{{ prefect.variables.gcp_project_id }}"
     - prefect.deployments.steps.git_clone:
           id: git-clone
           repository: "{{ prefect.variables.github_repo }}"
-          branch: git symbolic-ref --short HEAD
+          branch: "{{ get-git-branch.stdout }}"
     - prefect.deployments.steps.pip_install_requirements:
           id: pip-install-requirements
           requirements_file: requirements.txt
@@ -79,7 +83,7 @@ deployments:
       entrypoint: src/prefect/healthcheck.py:healthcheck
       work_pool: *prod_cloud_run_work_pool
       schedule: null
-    - name: "   "
+    - name: "ingest-monthly-platform-stats-gcs-prod"
       entrypoint: src/prefect/ingest_monthly_platform_stats_gcs.py:ingest_monthly_platform_stats_gcs
       work_pool: *prod_cloud_run_work_pool
       schedule:
