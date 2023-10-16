@@ -1,3 +1,20 @@
+# Secrets
+**/*.env*
+!make/.env
+!make/base.env
+.idea
+.phpunit.result.cache
+vendor/
+secret.gpg
+.gitsecret/keys/random_seed
+.gitsecret/keys/pubring.kbx~
+.secrets/*/*
+.secrets
+!**/*.secret
+gcp-service-account-key.json
+gcp-master-service-account-key.json
+**/variables.env
+
 # prefect artifacts
 .prefectignore
 
@@ -7,6 +24,12 @@ __pycache__/
 *$py.class
 *.egg-info/
 *.egg
+
+# Data
+data/
+
+# Settings
+.vscode
 
 # Type checking artifacts
 .mypy_cache/
@@ -36,5 +59,18 @@ dask-worker-space/
 .vscode/
 
 # VCS
-.git/
+.git/*
+.git
 .hg/
+
+# Setup files
+common_crawl.egg-info
+
+# Experimental files to try new Python functionality
+src/experimental
+
+# Jupyter Notebooks
+notebooks/*
+
+# Deployments
+deployments/*
