@@ -1,3 +1,4 @@
+# Secrets
 **/*.env*
 !.env.example
 !.make/variables.env
