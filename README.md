@@ -99,7 +99,7 @@ Start on `develop`
 Move on to `test`
 - Merge with `develop`
 - Run Integration Tests (ensures that the Docker image is updated in Artifact Registry) which also deploys the flow
-- Deploy Flow by runng `make deploy-flow`
+- Deploy Flow by running `make deploy-flow`
 - Sync with Bigquery (using existing Flow)
 
 Move on `prod`
