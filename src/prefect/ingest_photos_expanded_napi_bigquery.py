@@ -191,21 +191,22 @@ def ingest_photos_expanded_napi_bigquery(
             records_photo_metadata = []
 
             for response in responses:
-                response_json = response.json(object_hook=datetime_decoder)
-                response_json["requested_at"] = datetime.datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
+                if response.status_code == 200:
+                    response_json = response.json(object_hook=datetime_decoder)
+                    response_json["requested_at"] = datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
 
-                # This class initialization makes sure to filter the response by only keeping relevant keys
-                photo_editorial_metadata_expanded = (
-                    PhotoEditorialMetadataExpanded.from_dict(response_json)
-                )
+                    # This class initialization makes sure to filter the response by only keeping relevant keys
+                    photo_editorial_metadata_expanded = (
+                        PhotoEditorialMetadataExpanded.from_dict(response_json)
+                    )
 
-                # Convert back to dict so it can be written to Bigquery
-                record_photo_metadata = photo_editorial_metadata_expanded.to_dict()
-                record_photo_metadata["photo_id"] = record_photo_metadata["id"]
-                record_photo_metadata.pop("id", None)
-                records_photo_metadata.append(record_photo_metadata)
+                    # Convert back to dict so it can be written to Bigquery
+                    record_photo_metadata = photo_editorial_metadata_expanded.to_dict()
+                    record_photo_metadata["photo_id"] = record_photo_metadata["id"]
+                    record_photo_metadata.pop("id", None)
+                    records_photo_metadata.append(record_photo_metadata)
 
             write_photo_metadata_expanded_to_bigquery(
                 gcp_credentials, records_photo_metadata, env
@@ -215,21 +216,22 @@ def ingest_photos_expanded_napi_bigquery(
             request_log_records = []
 
             for response in responses:
-                response_json = response.json()
-                request_url = str(response.request.url)
-                request_id = response.headers["x-request-id"]
-                photo_id = response_json["id"]
+                if response.status_code == 200:
+                    response_json = response.json()
+                    request_url = str(response.request.url)
+                    request_id = response.headers["x-request-id"]
+                    photo_id = response_json["id"]
 
-                request_log_record = {
-                    "request_id": request_id,
-                    "request_url": request_url,
-                    "photo_id": photo_id,
-                    "requested_at": datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                }
+                    request_log_record = {
+                        "request_id": request_id,
+                        "request_url": request_url,
+                        "photo_id": photo_id,
+                        "requested_at": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                    }
 
-                request_log_records.append(request_log_record)
+                    request_log_records.append(request_log_record)
 
             write_request_log_to_bigquery(gcp_credentials, request_log_records, env)
 
