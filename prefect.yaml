@@ -126,7 +126,7 @@ deployments:
       proxy_type: datacenter
   - name: "ingest-photos-expanded-napi-bigquery-prod"
     entrypoint: src/prefect/ingest_photos_expanded_napi_bigquery.py:ingest_photos_expanded_napi_bigquery
-    work_pool: *pro_cloud_run_work_pool
+    work_pool: *prod_cloud_run_work_pool
     schedule:
       cron: "*/6 * * * *" # every N min
       timezone: "Europe/Berlin"
