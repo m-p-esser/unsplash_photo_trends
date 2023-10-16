@@ -119,7 +119,7 @@ def upload_files_to_gcs_bucket(
         )
         blobs.append((photo[0], future))
 
-    blobs = [(b[0], b[1]) for b in blobs if b[1].get_state().is_completed()]
+    blobs = [(b[0], b[1]) for b in blobs if b[1].wait().is_completed()]
 
     return blobs
 
@@ -226,7 +226,6 @@ def ingest_photos_gcs(
             blobs = upload_files_to_gcs_bucket(
                 requested_photos, gcp_credential_block_name, bucket_name, "jpg"
             )
-            logger.info(f"Uploaded Photos: {blobs}")
 
             # Store all sucessfully uploaded photo ids
             uploaded_photos_ids = [b[0] for b in blobs]
@@ -253,9 +252,10 @@ def ingest_photos_gcs(
 
                     download_log_records.append(download_log_record)
 
-            logged_records = write_download_log_to_bigquery(
-                gcp_credentials, download_log_records, env
-            )
+            if len(download_log_records) > 0:
+                logged_records = write_download_log_to_bigquery(
+                    gcp_credentials, download_log_records, env
+                )
 
             total_requested_photos += len(requested_photos)
             total_uploaded_photos += len(uploaded_photos_ids)
