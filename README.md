@@ -1,5 +1,11 @@
 # Unsplash Photo Trends
 
+![Unsplash Cover Photo](https://github.com/m-p-esser/common_crawl/blob/master/docs/images/unsplash_cover_image.png):
+
+## What is this Project about?
+
+This Project is about collecting Photo metadata from the Unsplash Photo Platform. Unsplash offers photos for download under a free licensing model.
+
 ## Prerequisites
 - A Google account (to create ressources in GCP)
 - A Prefect account (with access to the Prefect Cloud)
@@ -37,6 +43,9 @@
 ├── tests            --> Unit tests
 ```
 
+## Most important files
+prefect.yaml -> Deployment steps and configuration
+
 ## Setup
 
 ### Activate Pre-commit 
@@ -50,6 +59,7 @@ Define values in base.env (not part of this repository)
 Add the following Secrets as Action secrets to your Github repository: 
 - PREFECT_API_KEY
 - PREFECT_API_URL
+
 See https://docs.prefect.io/latest/api-ref/rest-api/#finding-your-prefect-cloud-details
 
 ### GCP Setup
