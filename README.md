@@ -20,8 +20,8 @@ The Data Pipeline consist of 5 different Flows (Jobs)
 
 ![Deployments](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/deployments.png)
 
-### Pipeline Design
-- [ ] Add Obsidian Canvas here
+### Data Flow Diagramm (DFD)
+![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/Unsplash Photo Trends _ Dataflow.png)
 
 ## Technology 
 
