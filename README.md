@@ -24,7 +24,7 @@ The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect
 
 
 ### Data Flow Diagramm (DFD)
-![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/Unsplash%20Photo%20Trends%20_%20Dataflow.png)
+![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/dataflow_diagram.png)
 
 ### Data Model
 
