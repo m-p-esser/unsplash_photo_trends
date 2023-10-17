@@ -2,7 +2,7 @@
 
 ![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png)
 
-##  1. <a name='TableofContents'></a>Table of Contents
+## <a name='TableofContents'></a>Table of Contents
 
 <!-- vscode-markdown-toc -->
 * 1. [Table of Contents](#TableofContents)
@@ -33,7 +33,7 @@
 
 <br>
 
-##  2. <a name='WhatisthisProjectabout'></a>What is this Project about?
+## <a name='WhatisthisProjectabout'></a>What is this Project about?
 
 Ever wondered **which** type of **photos are downloaded the most often**? Look no further. This project aims to deliver the answer to this question. 
 
@@ -43,7 +43,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 
 <br>
 
-##  3. <a name='TheDatasetinnumbers'></a> :1234: The Dataset in numbers
+## <a name='TheDatasetinnumbers'></a> :1234: The Dataset in numbers
 *Last Update on 17th October, 2023*
 - 243.000 **Photos**
 - 243.000 **Metadata** about Photos
@@ -54,7 +54,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 <br>
 
 
-##  4. <a name='DataFlowDiagrammDFD'></a> :arrow_right: Data Flow Diagramm (DFD)
+## <a name='DataFlowDiagrammDFD'></a> :arrow_right: Data Flow Diagramm (DFD)
 
 **Just the `EL`** part of `ELT` is **done in this project**. 
 
@@ -73,7 +73,7 @@ A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9
 <br>
 
 
-##  5. <a name='DataModel'></a>Data Model
+## <a name='DataModel'></a> :globe_with_meridians: Data Model
 
 The most important table is `photo-editorial-metadata-expanded` which contains Photo metadata from the *Editorial* section of Unsplash. 
 
@@ -87,14 +87,14 @@ Additional tables not shown in this diagram as they are external tables syncing 
 
 <br>
 
-##  6. <a name='DeploymentsFlows'></a> :rocket: Deployments *(Flows)*
+## <a name='DeploymentsFlows'></a> :rocket: Deployments *(Flows)*
 The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 <br>
 
-##  7. <a name='Technology'></a> :satellite: Technology 
+## <a name='Technology'></a> :satellite: Technology 
 
 **Storage**
 - [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
@@ -111,7 +111,7 @@ The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect
 - Bash
 - SQL
 
-##  8. <a name='Prerequisites'></a>Prerequisites
+## <a name='Prerequisites'></a>Prerequisites
 
 If you want to reproduce some of this code or copy and paste parts of it, feel free to do so.
 
@@ -124,7 +124,7 @@ If you want to build on this projects, here are the prerequisites
   - develop
   - test 
 
-##  9. <a name='Folderstructure'></a>Folder structure
+## <a name='Folderstructure'></a>Folder structure
 
 These are the main folders (and their their descrptions) of this Github repo. In case some folders are not visible, then they are not meant to be shared (see `.gitignore`) 
 
@@ -153,31 +153,31 @@ These are the main folders (and their their descrptions) of this Github repo. In
 ├── tests            --> Unit tests
 ```
 
-##  10. <a name='Mostimportantfilesonrootlevel'></a>Most important files on root level
+## <a name='Mostimportantfilesonrootlevel'></a>Most important files on root level
 
 - `prefect.yaml`: Deployment steps and configuration
 - `.pre-commit-config.yaml`: Pre-commit hooks which are run before each commit
 - `Makefile`: Settings for Makefile (which are stored in folder `make/*`)
 - `pyproject.toml` & `poetry.lock`: Python dependencies 
 
-##  11. <a name='Setup'></a>Setup
+## <a name='Setup'></a>Setup
 
-###  11.1. <a name='ActivatePre-commit'></a>Activate Pre-commit 
+### <a name='ActivatePre-commit'></a>Activate Pre-commit 
 Install Pre-commit hooks (for code formatting, import statement checks before committing)
 - `pre-commit install`
 
-###  11.2. <a name='EnvironmentVariables'></a>Environment Variables
+### <a name='EnvironmentVariables'></a>Environment Variables
 Define values in `base.env` (not part of this repository)
 For reference check `base.env.example` which contains all major variables required for this project
 
-###  11.3. <a name='GithubActionSecrets'></a>Github Action Secrets
+### <a name='GithubActionSecrets'></a>Github Action Secrets
 Add the following Secrets as Action secrets to your Github repository: 
 - `PREFECT_API_KEY`
 - `PREFECT_API_URL`
 
 See https://docs.prefect.io/latest/api-ref/rest-api/#finding-your-prefect-cloud-details
 
-###  11.4. <a name='GCPSetup'></a>GCP Setup
+### <a name='GCPSetup'></a>GCP Setup
 Run `make setup-gcp` to setup up the Google Cloud Project
 
 If this doesn't work, run the commands from `00_setup_gcp.mk` command by command in the following order:
@@ -190,20 +190,20 @@ If this doesn't work, run the commands from `00_setup_gcp.mk` command by command
 - `make bind-iam-policies-to-deployment-service-account`
 - `make set-deployment-service-account-as-default`
 
-###  11.5. <a name='EnvironmentSetup'></a>Environment Setup
+### <a name='EnvironmentSetup'></a>Environment Setup
 *necessary everytime you start working on the project*
 - `make env-init` to prepare ENV environment variable
 - `make dev-init` to setup development environment
 
-###  11.6. <a name='PrefectSetup'></a>Prefect Setup
+### <a name='PrefectSetup'></a>Prefect Setup
 As mentioned above, this project requires a Prefect account and access to the Prefect Cloud
 - `make setup-prefect` 
 
-###  11.7. <a name='SetupStorage'></a>Setup Storage
+### <a name='SetupStorage'></a>Setup Storage
 Setup the storage infrastructure by running
 - `make create-gcs-buckets`
 
-###  11.8. <a name='DeploymentandTesting'></a>Deployment and Testing
+### <a name='DeploymentandTesting'></a>Deployment and Testing
 
 Start on `develop`
 - Write Tasks and Flows
@@ -219,4 +219,3 @@ Move on to `test`
 Move on `prod`
 - Merge with `test`
 - Deploy Flow by running `make deploy-flow`
-
