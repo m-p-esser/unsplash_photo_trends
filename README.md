@@ -2,7 +2,7 @@
 
 ![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png)
 
-## What is this Project about?
+## :question: What is this Project about?
 
 Ever wondered **which** type of **photos are downloaded the most often**? Look no further. This project aims to deliver the answer to this question. 
 
@@ -22,11 +22,11 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 
 **Just the `EL`** part of `ELT` is **done in this project**. 
 
-Google Cloud Storage is used as initial, immutable raw data layer (`E`).
+**Google Cloud Storage** is used as initial, immutable raw data layer (`E`).
 
-BigQuery is used for two purposes: 
+**BigQuery** is used for two purposes: 
 1. to log which photos have already been requested. This logs are checked in each run, so the same image won't get requested twice.
-2. to serve as intermediata storage (`L`). The actual data for further processing and transformation (`T`).
+2. to serve as intermediata storage (`L`). The actual data requires further processing and transformation (`T`) to be suitable for data analysis.
 
 The following diagram describes the flow of data from different API endpoints to different storages.
 
@@ -37,9 +37,13 @@ A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9
 
 ## Data Model
 
+The most important table is `photo-editorial-metadata-expanded` which contains Photo metadata from the *Editorial* section of Unsplash. 
+
+*Editorial photos can only be used in editorial projects such as: news related materials (newspaper and magazine articles, TV news), blogs and educational materials.*
+
 ![Data Model](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/data_model.png)
 
-Additional tables not shown in this diagram as they are external tables syncing data from Google Cloud Storage to Big Query (not being picked up by ERM modeling software)
+Additional tables not shown in this diagram as they are external tables syncing data from Google Cloud Storage to Big Query and are not being picked up by ERM modeling software are:
 - [`monthly-platform-stats`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/monthly-platform-stats.png)
 - [`topics`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/topics.png)
 
