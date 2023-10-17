@@ -68,7 +68,7 @@ The following diagram describes the flow of data from different API endpoints to
 
 ![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/dataflow_diagram.png)
 
-A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9850ca3d-b10c-467c-b45a-238ff971833e/edit?viewport_loc=-3868%2C-1072%2C6376%2C3204%2C0_0&invitationId=inv_82e52a93-d67c-443a-a50d-1ead80641fcd) 
+A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9850ca3d-b10c-467c-b45a-238ff971833e/edit?viewport_loc=-3868%2C-1072%2C6376%2C3204%2C0_0&invitationId=inv_82e52a93-d67c-443a-a50d-1ead80641fcd) (Lucid account required)
 
 <br>
 
