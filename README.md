@@ -11,22 +11,25 @@ This Project is a <u>**Data Enginering Project**</u> about **collecting photo me
 The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and Google Cloud Storage and Google BigQuery as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough Google Cloud Runs.
 
 ## The Dataset in numbers
-- 243.000 Photos
-- 243.000 Metadata about Photos
+*Last Update on 17th October, 2023*
+- 243.000 **Photos**
+- 243.000 **Metadata** about Photos
   - including Views, Likes, Downloads, EXIF, Location, User
-- Daily Platform Stats
+- **Daily Platform Stats**
   - including number of views/downloads, new photos, new photographers etc
 
 ## Data Pipeline
 
 ### Deployments *(Flows)*
-The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job
+The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 
 ### Data Flow Diagramm (DFD)
-The following diagram describes the flow of data from different API endpoints to different storage points 
+The following diagram describes the flow of data from different API endpoints to different storage points
+
+Just the `EL` part of `ELT` is done in this project. Big Query is used to log which photos have already been requested. This logs are checked in each run, so the same image won't get requested twice.
 
 ![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/dataflow_diagram.png)
 
