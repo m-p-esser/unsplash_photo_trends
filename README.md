@@ -18,7 +18,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 ## Data Pipeline
 The Data Pipeline consist of 5 different Flows (Jobs)
 
-![Deployments](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/deployments.png)
+![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/Unsplash%20Photo%20Trends%20_%20Dataflow.png)
 
 ### Data Flow Diagramm (DFD)
 ![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/Unsplash Photo Trends _ Dataflow.png)
