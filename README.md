@@ -10,10 +10,12 @@ This Project is a <u>**Data Enginering Project**</u> about **collecting photo me
 
 The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and Google Cloud Storage and Google BigQuery as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough Google Cloud Runs.
 
-## Statistics
-- XXX.XXX Photos
-- XXX.XXX Metadata about Photos
-  - including Views, Likes, Downloads, EXIF, Location
+## The Dataset in numbers
+- 243.000 Photos
+- 243.000 Metadata about Photos
+  - including Views, Likes, Downloads, EXIF, Location, User
+- Daily Platform Stats
+  - including number of views/downloads, new photos, new photographers etc
 
 ## Data Pipeline
 
@@ -33,7 +35,11 @@ A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9
 
 ## Data Model
 
-- [ ] Add here
+![Data Model](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/data_model.png)
+
+Additional tables not shown in this diagram as they are external tables syncing data from Google Cloud Storage to Big Query (not being picked up by ERM modeling software)
+- [`monthly-platform-stats`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/monthly-platform-stats.png)
+- [`topics`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/topics.png)
 
 ## Technology 
 
