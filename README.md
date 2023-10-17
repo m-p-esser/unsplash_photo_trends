@@ -6,12 +6,12 @@
 
 <!-- vscode-markdown-toc -->
 * 1. [Table of Contents](#TableofContents)
-* 2. [:question: What is this Project about?](#question:WhatisthisProjectabout)
+* 2. [What is this Project about?](#WhatisthisProjectabout)
 * 3. [The Dataset in numbers](#TheDatasetinnumbers)
 * 4. [Data Flow Diagramm (DFD)](#DataFlowDiagrammDFD)
 * 5. [Data Model](#DataModel)
-* 6. [:rocket: Deployments *(Flows)*](#rocket:DeploymentsFlows)
-* 7. [:artificial_satellite: Technology](#artificial_satellite:Technology)
+* 6. [Deployments *(Flows)*](#rocket:DeploymentsFlows)
+* 7. [Technology](#artificial_satellite:Technology)
 * 8. [Prerequisites](#Prerequisites)
 * 9. [Folder structure](#Folderstructure)
 * 10. [Most important files on root level](#Mostimportantfilesonrootlevel)
@@ -31,7 +31,9 @@
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 
-##  2. <a name='question:WhatisthisProjectabout'></a>:question: What is this Project about?
+<br>
+
+##  2. <a name='question:WhatisthisProjectabout'></a>What is this Project about?
 
 Ever wondered **which** type of **photos are downloaded the most often**? Look no further. This project aims to deliver the answer to this question. 
 
@@ -85,14 +87,14 @@ Additional tables not shown in this diagram as they are external tables syncing 
 
 <br>
 
-##  6. <a name='rocket:DeploymentsFlows'></a>:rocket: Deployments *(Flows)*
+##  6. <a name='rocket:DeploymentsFlows'></a>Deployments *(Flows)*
 The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 <br>
 
-##  7. <a name='artificial_satellite:Technology'></a>:artificial_satellite: Technology 
+##  7. <a name='artificial_satellite:Technology'></a>Technology 
 
 **Storage**
 - [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
