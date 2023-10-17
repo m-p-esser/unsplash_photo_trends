@@ -18,18 +18,17 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 - **Daily Platform Stats**
   - including number of views/downloads, new photos, new photographers etc
 
-## Data Pipeline
+## Data Flow Diagramm (DFD)
 
-### Deployments *(Flows)*
-The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
+**Just the `EL`** part of `ELT` is **done in this project**. 
 
-![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
+Google Cloud Storage is used as initial, immutable raw data layer (`E`).
 
+BigQuery is used for two purposes: 
+1. to log which photos have already been requested. This logs are checked in each run, so the same image won't get requested twice.
+2. to serve as intermediata storage (`L`). The actual data for further processing and transformation (`T`).
 
-### Data Flow Diagramm (DFD)
-The following diagram describes the flow of data from different API endpoints to different storage points
-
-Just the `EL` part of `ELT` is done in this project. Big Query is used to log which photos have already been requested. This logs are checked in each run, so the same image won't get requested twice.
+The following diagram describes the flow of data from different API endpoints to different storages.
 
 ![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/dataflow_diagram.png)
 
@@ -43,6 +42,11 @@ A scrollable/zoomable version can be found [here](https://lucid.app/lucidchart/9
 Additional tables not shown in this diagram as they are external tables syncing data from Google Cloud Storage to Big Query (not being picked up by ERM modeling software)
 - [`monthly-platform-stats`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/monthly-platform-stats.png)
 - [`topics`](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/topics.png)
+
+## Deployments *(Flows)*
+The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
+
+![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 ## Technology 
 
