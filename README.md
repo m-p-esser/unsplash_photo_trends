@@ -4,7 +4,7 @@
 
 ## What is this Project about?
 
-Ever wondered **which** type of **photos are downloaded most often**? Look no further. This project aims to deliver the answer to this question. 
+Ever wondered **which** type of **photos are downloaded the most often**? Look no further. This project aims to deliver the answer to this question. 
 
 This Project is a <u>**Data Enginering Project**</u> about **collecting photo metadata** and actual **photos** from the **Unsplash Photo Platform**. Unsplash offers photos for download under a free licensing model.
 
@@ -16,12 +16,19 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
   - including Views, Likes, Downloads, EXIF, Location
 
 ## Data Pipeline
-The Data Pipeline consist of 5 different Flows (Jobs)
 
-![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/Unsplash%20Photo%20Trends%20_%20Dataflow.png)
+### Deployments *(Flows)*
+The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job
+
+![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
+
 
 ### Data Flow Diagramm (DFD)
-![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/Unsplash Photo Trends _ Dataflow.png)
+![DFD](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/Unsplash%20Photo%20Trends%20_%20Dataflow.png)
+
+### Data Model
+
+- [ ] Add here
 
 ## Technology 
 
