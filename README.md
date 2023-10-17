@@ -33,7 +33,7 @@
 
 <br>
 
-##  2. <a name='question:WhatisthisProjectabout'></a>What is this Project about?
+##  2. <a name='WhatisthisProjectabout'></a>What is this Project about?
 
 Ever wondered **which** type of **photos are downloaded the most often**? Look no further. This project aims to deliver the answer to this question. 
 
@@ -87,14 +87,14 @@ Additional tables not shown in this diagram as they are external tables syncing 
 
 <br>
 
-##  6. <a name='rocket:DeploymentsFlows'></a>Deployments *(Flows)*
+##  6. <a name='DeploymentsFlows'></a>Deployments *(Flows)*
 The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 <br>
 
-##  7. <a name='artificial_satellite:Technology'></a>Technology 
+##  7. <a name='Technology'></a>Technology 
 
 **Storage**
 - [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
