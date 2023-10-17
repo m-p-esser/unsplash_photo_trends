@@ -43,7 +43,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 
 <br>
 
-##  3. <a name='TheDatasetinnumbers'></a>The Dataset in numbers
+##  3. <a name='TheDatasetinnumbers'></a> :1234: The Dataset in numbers
 *Last Update on 17th October, 2023*
 - 243.000 **Photos**
 - 243.000 **Metadata** about Photos
@@ -54,7 +54,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 <br>
 
 
-##  4. <a name='DataFlowDiagrammDFD'></a>Data Flow Diagramm (DFD)
+##  4. <a name='DataFlowDiagrammDFD'></a> :arrow_right: Data Flow Diagramm (DFD)
 
 **Just the `EL`** part of `ELT` is **done in this project**. 
 
@@ -87,14 +87,14 @@ Additional tables not shown in this diagram as they are external tables syncing 
 
 <br>
 
-##  6. <a name='DeploymentsFlows'></a>Deployments *(Flows)*
+##  6. <a name='DeploymentsFlows'></a> :rocket: Deployments *(Flows)*
 The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
 <br>
 
-##  7. <a name='Technology'></a>Technology 
+##  7. <a name='Technology'></a> :satellite: Technology 
 
 **Storage**
 - [Google Cloud Storage](https://cloud.google.com/storage?hl=en)
