@@ -88,7 +88,7 @@ Additional tables not shown in this diagram as they are external tables syncing 
 <br>
 
 ## <a name='DeploymentsFlows'></a> :rocket: Deployments *(Flows)*
-The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
+The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job.
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
