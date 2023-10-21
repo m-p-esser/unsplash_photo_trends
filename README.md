@@ -39,7 +39,7 @@ Ever wondered **which** type of **photos are downloaded the most often**? Look n
 
 This Project is a <u>**Data Enginering Project**</u> about **collecting photo metadata** and actual **photos** from the **Unsplash Photo Platform**. Unsplash offers photos for download under a free licensing model.
 
-The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and **`Google Cloud Storage`** and **`Google BigQuery`** as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough **`Google Cloud Run`**s.
+The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and **`Google Cloud Storage`** and **`Google BigQuery`** as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough `Google Cloud Run`s.
 
 <br>
 
