@@ -45,7 +45,7 @@ The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/)
 
 ## <a name='TheDatasetinnumbers'></a> :1234: The Dataset in numbers
 *Last Update on 17th October, 2023*
-- 243.000 **Photos**
+- 243.000 **Photos** (~712 GiB)
 - 243.000 **Metadata** about Photos
   - including Views, Likes, Downloads, EXIF, Location, User
 - **Unsplash Platform Stats**
