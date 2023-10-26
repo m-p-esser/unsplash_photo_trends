@@ -39,17 +39,17 @@ Ever wondered **which** type of **photos are downloaded the most often**? Look n
 
 This Project is a <u>**Data Enginering Project**</u> about **collecting photo metadata** and actual **photos** from the **Unsplash Photo Platform**. Unsplash offers photos for download under a free licensing model.
 
-The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and Google Cloud Storage and Google BigQuery as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough Google Cloud Runs.
+The Project is mostly written in Python, uses [Prefect](https://www.prefect.io/) for Data Orchestration and **`Google Cloud Storage`** and **`Google BigQuery`** as main storage technologies. The Jobs are scheduled either daily or in 10-60 minute intervals and are executed trough `Google Cloud Run`s.
 
 <br>
 
 ## <a name='TheDatasetinnumbers'></a> :1234: The Dataset in numbers
 *Last Update on 17th October, 2023*
-- 243.000 **Photos**
-- 243.000 **Metadata** about Photos
+- 243.000 **Photos** (~712 GiB)
+- 243.000 **Metadata** Photo entries
   - including Views, Likes, Downloads, EXIF, Location, User
-- **Daily Platform Stats**
-  - including number of views/downloads, new photos, new photographers etc
+- **Unsplash Platform Stats**
+  - including number of total photos/views/downloads on platform, daily new photos, daily new photographers etc.
 
 <br>
 
@@ -88,7 +88,7 @@ Additional tables not shown in this diagram as they are external tables syncing 
 <br>
 
 ## <a name='DeploymentsFlows'></a> :rocket: Deployments *(Flows)*
-The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job. Ignore the `healhcheck-prod` Flow (which just checks network/machine accesibility)
+The Data Pipeline consist of 5 different Flows. A Flow in the context of Prefect is comparable to an ETL Job.
 
 ![Deployments](https://raw.githubusercontent.com/m-p-esser/unsplash_photo_trends/master/docs/images/deployments.png)
 
