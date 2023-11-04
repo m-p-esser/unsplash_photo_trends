@@ -1,5 +1,7 @@
 # Unsplash Photo Trends
 
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fm-p-esser%2Funsplash_photo_trends&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+
 ![Unsplash Cover Photo](https://github.com/m-p-esser/unsplash_photo_trends/blob/master/docs/images/unsplash_cover_image.png)
 
 ## <a name='TableofContents'></a>Table of Contents
